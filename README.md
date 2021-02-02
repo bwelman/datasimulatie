@@ -1,2 +1,3 @@
-# datasimulatie
-Genereren van data voor experimenten
+# Datasimulatie
+
+Verzameling notities en experimenten voor het simuleren van "fake" data.

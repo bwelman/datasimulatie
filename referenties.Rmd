@@ -1,0 +1,30 @@
+# Referenties
+
+**Algemeen:**
+
++ [Simulated Data with R](http://michaelminn.net/tutorials/r-simulating-data/)
++ [Generating/Simulating data, Clay Ford](https://clayford.github.io/dwir/dwr_12_generating_data.html)
++ [Simulation, Hadley Wickham](http://had.co.nz/stat480/lectures/15-simulation.pdf)
++ [Elements of Applied Biostatistics, Chapter 7](https://www.middleprofessor.com/files/applied-biostatistics_bookdown/_book/creating-fake-data.html)
++ Richard Vogg: [blog](https://r-vogg-blog.netlify.app/) en [github](https://github.com/richardvogg/r-vogg-blog)
+
+**simstudy:**
+
++ [ouR data generation](https://www.rdatagen.net), website Keith Goldfeld, met uitleg package simstudy en blogs
++ [Simulating study data: introduction, 2020-03-31](https://cran.r-project.org/web/packages/simstudy/vignettes/simstudy.html)
++ [Simulating fake data, 2019-10-26](https://gsverhoeven.github.io/post/simulating-fake-data/)
+
+**Ariel Muldoon:**
+
++ [Simulate! Simulate! - Part 1: A linear model, 2018-01-09](https://aosmith.rbind.io/2018/01/09/simulate-simulate-part1/)
++ [Simulate! Simulate! - Part 2: A linear mixed model, 2018-04-23](https://aosmith.rbind.io/2018/04/23/simulate-simulate-part-2/)
++ [A closer look at replicate() and purrr::map() for simulations, 2018-06-05](https://aosmith.rbind.io/2018/06/05/a-closer-look-at-replicate-and-purrr/)
++ [Simulate! Simulate! - Part 3: The Poisson edition, 2018-07-18](https://aosmith.rbind.io/2018/07/18/simulate-poisson-edition/)
++ [Getting started simulating data in R: some helpful functions and how to use them, 2018-08-29](https://aosmith.rbind.io/2018/08/29/getting-started-simulating-data/)
++ [Simulate! Simulate! - Part 4: A binomial generalized linear mixed model, 2020-08-20](https://aosmith.rbind.io/2020/08/20/simulate-binomial-glmm/)
+
+**Online sites:**
+
++ [Fantasy Name Generators, ook Nederlandstalige](https://www.fantasynamegenerators.com/dutch_names.php)
++ [Fake Name Generator, ook Nederlands](https://www.fakenamegenerator.com/)
++ [Mockaroo](https://www.mockaroo.com/)

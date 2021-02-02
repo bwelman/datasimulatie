@@ -1,0 +1,3 @@
+bookdown::bs4_book:
+  theme:
+    bootswatch: "litera"

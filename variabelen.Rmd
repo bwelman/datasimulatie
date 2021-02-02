@@ -1,0 +1,264 @@
+# Variabelen
+
+## Categorieën
+
+### Letters alfabet
+
+```{r}
+rep(LETTERS[1:5], times = 3)
+rep(letters[1:2], times = c(2, 4))
+```
+
+### Maanden
+
+Er zijn twee ingebouwde constanten voor de Engelstalige maanden van het jaar: `month.name` voor de volledige namen en `month.abb` voor de  drieletter afkortingen.
+
+```{r}
+month.name
+month.abb
+```
+
+Ook hierop kun je de functie `rep()` toepassen.
+
+```{r}
+rep(month.abb[1:3], 4)
+```
+
+Ik heb Nederlandstalige definities voor de maandnamen gemaakt en opgenomen in de eigen package `swrtools`
+
+```{r}
+month.abb.nl
+month.name.nl
+```
+
+### Strings
+
+```{r}
+verkopers <- c("Jansen", "Pietersen", "Klaassen")
+rep(verkopers, each = 2)
+steden <- c("Enschede", "Hengelo", "Almelo")
+rep(steden, times = 3)
+```
+
+### Persoonsnamen
+
+Vaak gebruik ik voor namen de bekende kleurtjes:
+
+```{r}
+KleurPersonen <- data.frame(
+	Naam = c("An Azuur", "Berend Blauw", "Chris Cyaan", "Gerrit Groen", "Ivo Indigo", "Mari Magenta", "Otto Oranje", "Peter Paars", "Roger Rood", "Stan Sepia", "Trudy Turkoois", "Vicky Violet", "Willem Wit", "Zorro Zwart"), 
+	Sexe = c("v", "m", "m", "m", "m", "v","m", "m", "m", "m", "v", "v", "m", "m")
+	)
+knitr::kable(KleurPersonen)
+```
+
+## Getallen
+
+### Reeksen
+
+**Opeenvolgend**
+
+Het genereren van reeksen van opeenvolgende gehele getallen gaat het eenvoudigst met de **dubbele punt** operator .Het resultaat bestaat uit alle gehele getallen tussen het aantal voor de dubbele punt en het aantal na de dubbele punt, inclusief de grenswaarden. De volgorde kan oplopend of aflopend zijn.
+
+```{r}
+x <- 1:10
+x
+y <- 6:-3
+y
+```
+
+**Vaste stapgrootte met `seq()`**
+
+Voor reeksen van reële getallen of reeksen met een vaste stapgrootte ertussen gebruik je de functie `seq(from, to, by)`.
+
+```{r}
+seq(from = 10, to = 12, by = 0.4)
+```
+
+**Herhalingen met `rep()`**
+
+Voor reeksen met herhalingen van waarden kun je de functie `rep(x, ...)` gebruiken, waarbij x een vectoris . Syntax:
+
++ `rep(x, times = 1)` - voor het aantal keren dat vector x herhaald moet worden
++ `rep(x, each = 1)` - elke unieke waarde van vector  x wordt een aantal keren herhaald
++ `rep(x, length.out = NA)` - gewenste totale lengte uitvoer. Het argument mag ook afgekort worden tot `len`.
+
+```{r}
+rep(3, times = 5)
+rep(1:4, len = 10)
+rep(1:4, times = c(2,3,1,2)) # deze constructie kan alleen met times
+rep(1:4, each = 2)
+rep(1:4, each = 2, len = 6) # combinatie van argumenten
+rep(1:4, each = 2, times = 3)
+```
+
+
+### Verdelingen
+
+De functies `rnorm()`, `runif()`, ... genereren reële getallen. Wanneer je gehele getallen wilt, dan kun je deze functies ook gebruiken, samen met de afrondingsfunctie `round()` en `as.integer()` voor de type conversie. Om de random generator op een specifiek punt te starten kun je de functie `set.seed()` gebruiken. Een andere optie is om de functie `sample()` (zie verderop) te gebruiken.
+
+
+#### Normale verdeling `rnorm()`
+
+Trekking uit een Normale verdeling, default `rnorm(n, mean = 0, sd = 1)`
+
+```{r}
+set.seed(16)
+rnorm(n = 1000, mean = 65, sd = 3) %>% qplot()
+```
+
+Je kunt aselecte getallen uit meerdere verschillende normale verdelingen krijgen door een vector voor de parameters `mean` en `sd` te gebruiken. Dit kan nuttig zijn wanneer bijvoorbeeld data wilt simuleren voor een ANOVA analyse van een experiment met verschillende groepsgemiddeldes maar met dezelfde variantie.
+
+```{r}
+rnorm(n = 10, mean = c(5, 8, 12), sd = 1)
+```
+
+De functie trekt achter elkaar een waarde uit elke verdeling tot het aantal opgegeven getallen bereikt is.
+
+#### Uniforme verdeling `runif()`
+
+Trekking uit een Uniforme verdeling, default `runif(n, min = 0, max = 1)`
+
+Wanneer je getallen wilt genereren die strikt positief en continu zijn kan het gebruik hiervan erg nuttig zijn.
+
+```{r}
+runif(n = 1000, min = 10, max = 20) %>% qplot()
+```
+
+Wanneer je gehele getallen wilt hebben die ook nog eens van het type integer zijn kun je ook de functies `round()` en `as.integer()` gebruiken.
+
+```{r}
+as.integer(round(runif(n = 10, min = 40, max = 60)))
+```
+
+#### Poisson verdeling `rpois()`
+
+Voor discrete getallen
+
+Trekking uit een Poisson verdeling `rpois(n, lambda)` met
+
++ gemiddelde = `lambda`
++ variantie = `lambda`
+
+Het argument *lambda* is het gemiddelde, heeft geen default waarde en moet een niet-negatief getal zijn (integer hoeft niet). Je kunt de functie goed gebruiken voor bijvoorbeeld het genereren van frequenties van waarden.
+
+```{r}
+rpois(n = 100, lambda = 3.5) %>% qplot()
+```
+
+#### Negatief binomiale verdeling `rbinom()`
+
+Trekking uit een negatief binomiale verdeling `rbinom(n, size, prob)` met
+
++ `size` - aantal pogingen
++ `prob` - kans op succes voor elke poging
+
+Voorbeeld van een fabriek welke 150 producten per week maakt. Bij de eindcontrole wordt gemiddeld bij 5% van de producten een fout aangetroffen die gerepareerd moeten worden. Simuleer het aantal foute producten voor 10 weken.
+
+```{r}
+rbinom(n = 600, size = 150, prob = 0.05) %>% qplot()
+```
+
+#### Exponentiële verdeling `rexp()`
+
+Trekking uit een exponentiële verdeling `rexp(n, rate = 1)` met
+
++ `rate`` - met verwachting is `1/rate`
+
+De verdeling is goed te gebruiken voor data met uitschieters.
+
+```{r}
+rexp(1000,rate=0.01) %>% qplot()
+```
+
+### pmax() en pmin()
+
+`pmax()` en `pmin()` nemen een of meer vectoren als argumenten, recyclen ze tot een gemeenschappelijke lengte en retourneren een enkele vector die de ‘parallel’ maxima (of minima) van de argumentvectoren geeft.
+
+In het voorbeeld hierna zijn `x1` en `x2` vectoren van gelijke lengte. De functies `pmax()` en `pmin()` vergelijken de vectoren elementsgewijs en nemen dan respectievelijk de grootste of de kleinste waarde. De resultaatvector is evenlang als de argumentvectoren.
+
+```{r}
+x1 <- c(3, 9, 4, 5, 2, 6)
+x2 <- c(1, 8, 6, 6, 7, 0)
+pmax(x1, x2)
+pmin(x1, x2)
+```
+
+Je kunt deze functies gebruiken in combinatie met trekkingen uit verdelingen om zodoende waarden te kijgen boven of onder een bepaalde limietwaarde.
+
+In het voorbeeld worden eerst 30 getallen uit een normale verdeling $N(50,25$ getrokken. Daarna wordt met `pmax`een ondrgrens van 10 ingesteld en met `pmin` een bovengrens van 90. En tenslotte zowel een onder- als bovengrens.
+
+```{r}
+set.seed(30)
+x <- round(rnorm(n = 30, mean = 50, sd = 25), 1)
+x
+
+# Bouw een ondergrens in
+pmax(x, 10)
+# Bouw een bovengrens in
+pmin(x, 90)
+# Bouw een ondergrens en bovengrens in.
+x %>% pmax(10) %>% pmin(90)
+```
+
+## Sample()
+
+De functie `sample()` trekt een aantal waarden willekeurig uit een verzameling met of zonder teruglegging.
+
+Syntax: `sample(x, size, replace = FALSE, prob = NULL)`
+
++ `x` - vector met waarden waaruit getrokken gaat worden.
++ `size` - het aantal te trekken waarden
++ `replace` - voor met (TRUE) of zonder (FALSE) teruglegging
++ `prob` - een vector met waarschijnlijkheidsgewichten
+
+**Voorbeeld Lotto (6 uit 49)**
+
+```{r}
+sample(1:49, size = 6, replace = FALSE) %>% sort()
+```
+
+**Voorbeeld data frame**
+
+Trekking van 5 personen uit de eerder gedefinieerde data frame KleurPersonen. De functie `sample()` wordt hier toegepast op de vector met rijnummers.
+
+```{r}
+KleurPersonen[sample(nrow(KleurPersonen), size = 5, replace = FALSE), ]
+```
+
+**Voorbeeld met kansverdeling**
+
+Trekking van 30 beroepen uit een verzameling [arts, leraar, politieagent] waarbij ongeveer de helft uit leraar moet bestaan.
+
+```{r}
+sample(c("arts", "leraar", "politieagent"), size = 30, replace = TRUE, prob = c(0.25, 0.50, 0.25)) %>% table()
+```
+
+De getallen in `prob` geven gewichten aan. Ze mogen niet negatief zijn en ook niet allemaal 0. De som hoeft ook niet 1 te zijn. Intern worden de gewichten omgerekend naar kansen. Zo zorgt `prob = c(1, 2, 3)` voor respectievelijke kansen van 1/6, 2/6 en 3/6.
+
+**Complexer voorbeeld met kansen**
+
+Bij 200 trekkingen uit de getallen 1 t/m 10 moet ca. 50% uit het getal 7 bestaan. De kansen op de andere getallen zijn allemaal even groot. Ken je nu aan de getallen 1 t/m 6 en 7 t/m 10 een gewicht van 1 toe, dan is de som van deze gewichten 9. Aan het getal 7 moet dan het gewicht 9 toegekend worden. Om te controleren of ongeveer de helft uit 7 bestaat gaat aardig met een staafdiagram.
+
+```{r}
+set.seed(28)
+trekking <- sample(1:10, size = 200, replace = TRUE, prob = c(rep(1, 6), 9, rep(1, 3)))
+trekking %>% table()
+qplot(trekking == 7)
+```
+
+## Data frames
+
+Je kunt eenvoudig afzonderlijke variabelen combineren in een data frame.
+
+```{r, fig.width=5, fig.height=4}
+aantal = 1000
+id <- 1:aantal
+leeftijd <- rnorm(n = aantal, mean = 50, sd = 15)
+instrument <- sample(c("Guitaar", "Piano", "Trompet"), size = aantal, replace = TRUE, prob = c(4,2,1))
+df <- data.frame( id,
+				  leeftijd = round(leeftijd),
+				  instrument)
+
+qplot(instrument, leeftijd, geom = "boxplot")
+```
