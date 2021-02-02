@@ -1,0 +1,115 @@
+# Afhankelijke data
+
+Wanneer je in het onderwijs een bepaalde statistische modellen en methodes wilt uitleggen heb je daarvoor vaak data nodig waarin de te behandelen problematiek naar voren komt. Meestal heb je dan te maken met enige afhankelijkheid tussen de variabelen. Jouw "verhaal" moet dan in de data verstopt zitten.
+
+In hoofdstuk \@ref(variabelen) heb je kunnen zien hoe je data voor onafhankelijke variabelen kunt simuleren. In dit hoofdstuk wordt gekeken naar hoe je de gewenste afhankelijkheid tussen variabelen kunt creëren.
+
+## Afhankelijkheid door regels
+
+### Verschillende verdelingen
+
+Afhankelijk van de waarde voor de ene variabele kun je een andere verdeling voor de andere variabele kiezen. Als voorbeeld een dataset met de variabelen `geslacht` (man/vrouw) en de variabele `lengte` (in hele cm).
+
++ 550 vrouwen met lengte = N(165,5)
++ 450 mannen met lengte = N(170,20)
+
+Dit is een voorbeeld van twee groepen met verschil in gemiddelde en verschil in standaarddeviatie.
+
+```{r}
+set.seed(42)
+mydata <- tibble(geslacht = c(rep("vrouw", times = 550), rep("man", times = 450)),
+                 lengte = c(round(rnorm(n = 550, mean = 165, sd = 5),1), 
+                            round(rnorm(n = 450, mean = 170, sd = 20),1)))
+```
+
+Het verschil kun je goed controleren via een boxplot.
+
+```{r}
+ggplot(data = mydata, aes(x = geslacht, y = lengte)) +geom_boxplot()
+```
+
+> Je kunt limieten voor onder- en bovengrens inbouwen met pmin() en pmax().
+
+Het
+
+### ifelse()
+
+Met de functie `ifelse()` uit package `dplyr` kun je een nieuwe variabele maken die afhankelijk is van een andere variabele. Stel je wilt voor een verzameling van 1000 personen de variabebelen `leeftijd` en `status` (gehuwd / ongehuwd) simuleren, met de volgende eisen:
+
++ Ongeveer de helft van de personen is gehuwd.
++ Voor de leeftijd geldt iedereen 18 jaar of ouder is en dat de gehuwd personen gemiddeld iets ouder zijn dan de ongehuwde personen. Respectievelijk een gemiddelde leeftijd van 40 en 30 jaar.
+
+Allereerst wordt voor 1000 personen de waarden voor de variabele status gesimuleerd.
+
+```{r}
+aantal <- 1000
+mydata <- tibble(id = 1:aantal, 
+                 status = sample(c("gehuwd", "ongehuwd"), size = aantal, replace = TRUE))
+table(mydata$status)
+```
+
+Omdat de kans op "gehuwd" en "ongehuwd" even groot is, zal dus ongeveer de helft gehuwd zijn. Je kunt dit controleren via de tabel.
+
+```{r}
+mydata <- mydata %>% 
+  mutate(
+    leeftijd = ifelse(status == "gehuwd", 
+                      rnorm(aantal, 40, sd = 10), 
+                      rnorm(aantal, 30, sd = 12)) %>% 
+      pmax(18) %>% 
+      round()
+    )
+head(mydata, 8)
+```
+
+Of er verschil in leeftijd is kun je bijvoorbeeld zichtbaar maken met een boxplot.
+
+```{r}
+ggplot(data = mydata, aes(x = status, y = leeftijd)) + geom_boxplot()
+```
+
+Hoeveel personen van 18 jaar zijn er gehuwd?
+
+```{r}
+mydata %>% filter(status == "gehuwd" & leeftijd == 18) %>% nrow()
+```
+
+Als je de verdeling van de status onder de 18-jarigen wilt weten, dan kan dat met
+
+```{r}
+mydata %>% filter(leeftijd == 18) %>% count(status)
+```
+
+### case_when()
+
+Wanneer je meer dan twee opties hebt kun je de functie `case_when()` uit package `dplyr` gebruiken. In het volgende voorbeeld wordt het banksaldo voor drie verschillende beroepen gesimuleerd. De grootte van het banksaldo is afhankelijk van het beroep en is verder positief en niet nul.
+
+Allereerst wordt voor 1000 personen de beroepen gesimuleerd volgens een bepaalde kansverdeling.
+
+```{r}
+aantal = 1000
+mydata <- tibble(id = 1:aantal, 
+                 beroep = sample(c("arts", "leraar", "politieagent"), size = aantal, replace = TRUE, prob = c(2,5,3))
+                 )
+table(mydata$beroep)
+```
+
+En vervolgens simulatie van het banksaldo, afhankelijk van het beroep.
+
+```{r}
+mydata <- mydata %>% 
+  mutate(banksaldo = case_when(
+    beroep == "arts" ~ 200 + rexp(aantal, rate = 0.001),
+    beroep == "leraar" ~ 200 + rexp(aantal, rate = 0.005),
+    TRUE ~ 100 + rexp(aantal, rate = 0.01)) # dit is case else
+    %>% round()
+         )
+```
+
+De verdeling van de banksaldi wordt inzichtelijk gemaakt met een boxplot.
+
+```{r}
+mydata %>% ggplot(aes(x = beroep, y = banksaldo)) + geom_boxplot()
+```
+
+## Afhankelijkheid door correlatie

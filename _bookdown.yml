@@ -24,4 +24,5 @@ language:
 rmd_files:
   - "index.Rmd"
   - "variabelen.Rmd"
+  - "afhankelijke-data.Rmd"
   - "referenties.Rmd"
