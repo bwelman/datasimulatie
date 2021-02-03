@@ -1,0 +1,98 @@
+# Nuttige packages
+
+Er zijn verschillende packages die behulpzaam kunnen zijn bij het simuleren van data
+De hier genoemde packages zijn nog niet of beperkt onderzocht.
+
+Zie ook het artikel [Fake Data with R](https://rviews.rstudio.com/2020/09/09/fake-data-with-r/)
+
+En [Experimental-data-simulation](https://github.com/pablobernabeu/Experimental-data-simulation)
+
+## simstudy
+
+Dit is een package ontwikkeld door Keith Goldfeld met als doel om op een gemakkelijke manier data te kunnen genereren voor simulaties en onderwijs.
+
+Simulatie met `simstudy` kent twee essentiële stappen:
+
+1. Definitie van de data-elementen van een dataset, hetzij in een extern csv-bestand, hetzij intern door middel van een reeks herhaalde definitie-instructies.
+2. Genereren van de data met behulp van deze definities.
+
+```{r}
+library(simstudy)
+def <- defData(varname = "x", dist = "uniformInt", formula = "10;20")
+dt1 <- genData(30, def)
+table(dt1$x)
+```
+
+```{r}
+def <- defData(varname = "nr",        dist = "nonrandom",   formula = 7, id = "idnum")
+def <- defData(def, varname = "x1",   dist = "uniform",     formula = "10;20")
+def <- defData(def, varname = "y1",                         formula = "nr + x1 * 2", variance = 8)
+def <- defData(def, varname = "y2",   dist = "poisson",     formula = "nr - 0.2 * x1", link = "log")
+def <- defData(def, varname = "xCat", dist = "categorical", formula = "0.3;0.2;0.5")
+def <- defData(def, varname = "g1",   dist = "gamma",       formula = "5+xCat", variance = 1, link = "log")
+def <- defData(def, varname = "a1",   dist = "binary",      formula = "-3 + xCat", link = "logit")
+
+dt2 <- genData(10, def)
+dt2
+```
+
+## charlatan
+
+Bronnen:
+
++ [rOpenSci: The charlatan package](https://docs.ropensci.org/charlatan/)
+
+Met deze package kun je verschillende soorten fake data maken.  Pakket is nog in ontwikkeling en nog niet erg bruikbaar in de praktijk.
+
+## fabricatr
+
+Bronnen:
+
++ [Building and Importing Data](https://declaredesign.org/r/fabricatr/articles/building_importing.html)
+
+```{r eval=FALSE}
+library(fabricatr)
+mydata <- fabricate(N = 10, 
+            gewicht = round(runif(N, min = 55, max = 82), 1), 
+            lengte = round(rnorm(N, mean = 174, sd = 12), 0))
+mydata
+```
+
+## fakeR
+
+Bronnen:
+
+- https://cran.r-project.org/web/packages/fakeR/vignettes/my-vignette.html
+
+Hiermee kun je nepgegevens genereren die overeenkomen met de echte gegevens uit een dataset. Er kunnen gegevens gesimuleerd worden uit een gegevensset met verschillende gegevenstypen. Categoriegegevens kunnen willekeurig uit een kruistabel gehaald worden en numerieke gegevens uit multivariate verdelingen waarbij rekening gehouden wordt met onderlinge correlaties tussen de variabelen. Er zijn ook functies beschikbaar om stationaire tijdreeksen te simuleren.
+
+## fakir
+
+Bronnen:
+
++ [fakir](https://thinkr-open.github.io/fakir/)
++ [How to generate meaningful fake data for learning, experimentation and teaching, 2019-08-09](https://www.programmingwithr.com/how-to-generate-meaningful-fake-data-for-learning-experimentation-and-teaching/)
+
+Niet erg bruikbaar.
+
+## faux
+
+Bronnen:
+
++ [faux](https://debruine.github.io/faux/)
++ [GitHub source code](https://github.com/debruine/faux)
+
+Heeft functies voor het simuleren van categoriale data. Ik zie het gebruik hiervan nog niet zo zitten.
+
+## wakefield
+
+Bronnen:
+
++ [github](https://github.com/trinker/wakefield)
++ [Richard Vogg](https://r-vogg-blog.netlify.app/posts/2020-12-03-useful-packages-for-data-composition/#wakefield)
+
+##GenOrd
+
+Wordt sinds 2015 niet meer bijgehouden lijkt me.
+
+Deze package helpt om discrete willekeurige variabelen te creëren met voorgeschreven correlatiematrix en marginale verdelingen. 

@@ -25,4 +25,5 @@ rmd_files:
   - "index.Rmd"
   - "variabelen.Rmd"
   - "afhankelijke-data.Rmd"
+  - "packages.Rmd"
   - "referenties.Rmd"
