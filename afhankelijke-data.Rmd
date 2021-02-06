@@ -113,3 +113,165 @@ mydata %>% ggplot(aes(x = beroep, y = banksaldo)) + geom_boxplot()
 ```
 
 ## Afhankelijkheid door correlatie
+
+Er zijn aantal packages welke mogelijkheden bieden om gecorreleerde variabelen te maken. Om meer begrip voor de materie te krijgen wordt begonnen met de Cholesky decompositie waarbij je zelf de nodige bewerkingen moet uitvoeren. Daarna komen de meer geautomatiseerde functies uit speciale packages aan bod.
+
+### Met Cholevsky decompositie
+
+Met behulp van een Cholevsky decompositie is het mogelijk om gecorreleerde random variabelen te maken uit gesimuleerde ongecorreleerde variabelen. Het komt op het volgende neer.
+
+Uitgaande van $v$ variabelen $x_1, x_2, x_3, ..., x_v$ specificeer je een correlatiematrix $C[v, v]$. Op de hoofddiagonaal zijn de waarden gelijk aan 1. De andere waarden zijn de onderlinge correlatiecoëfficiënten, liggend tussen 0 en 1.
+
+Voor elke variabele worden er $w$ waarnemingen gesimuleerd. Deze zijn ongecorreleerd en worden verzameld in een matrix $X$. Hieruit moet dan een matrix $Y$ gemaakt worden met gecorreleerde waarden. Dit gaat in twee stappen:
+
+1. Bepaal de Cholesky factor $L$ via decompositie van $C$. Dus $LL^T = C$
+2. Voer een matrixvermenigvuldiging $LX$ uit. Dus $Y = LX$
+
+LET OP: Omdat er een matrixvermenigvuldiging van $L$ met $X$ uitgevoerd gaat worden moet $X$ een $v \times w$ matrix zijn! Dus elke rij van $X$ bevat alle waarnemingen van één variabele.
+
+**Cholesky factor L**
+
+Voor een klein aantal variabelen kun je deze nog wel handmatig uitrekenen. Zo is voor twee variabelen met een correlatiecoëfficiënt $r$ de correlatiematrix:
+
+$C = \begin{bmatrix}1 & r \\ r & 1\end{bmatrix}$
+
+Je kunt gemakkelijk afleiden dat dan de Cholesky factor gelijk is aan:
+
+$L = \begin{bmatrix}1 & 0 \\ r & \sqrt{1 - r^2}\end{bmatrix}$
+
+Handiger is het om van R functies gebruik te maken. Met functie `chol()` krijg je de bovendriehoeksmatrix $L^T$. Door deze te transponeren met functie `t()` krijg je $L$.
+
+**Voorbeeld met 3 variabelen**
+
+Ik heb ervaren dat deze methode niet voor alle verdelingen goed werkt, met name wanneer dez flink verschillen in de parameters. Vandaar dat in dit voorbeeld met drie gelijksoortige verdelingen gewerkt wordt.
+
+```{r}
+( C = matrix(data = c(1, .8, .2, .8, 1, .5, .2, .5, 1), nrow = 3, byrow = TRUE) ) # correlatiematrix
+L = t(chol(C))
+
+w = 1000      # aantal waarnemingen
+set.seed(49)
+x1 <- rnorm(w,0,1)
+x2 <- rnorm(w,0,1)
+x3 <- rnorm(w,0,1)
+
+X <- rbind(x1,x2,x3)
+Y = t(L %*% X)
+round(cor(Y), 4)
+```
+
+Wanneer het aantal waarnemingen klein is zullen de verkregen correlatiecoëfficiënten sterker afwijken van de gespecificeerde.
+
+### mvrnorm()
+
+In package MASS zit functie `mvrnorm` waarmee je snel en gemakkelijk meerdere normaal verdeelde variabelen tegelijk kunt genereren.
+
+Syntax: `mvrnorm(n = 1, mu, Sigma, tol = 1e-6, empirical = FALSE, EISPACK = FALSE)` met
+
++ n	- het aantal waarnemingen.
++ mu - een vector met de gemiddeldes van de variabelen.
++ Sigma	 - een positief symmetrische matrix met de covarianties voor de variabelen.
++ empirical	- logisch. Indien TRUE, mu en Sigma specificeren de empirische niet populatiegemiddelde en covariantiematrix.
+
+De matrix decompositie wordt gedaan door de functie `eigen` welke stabieler schijnt te zijn dan Cholesky.
+
+**Voorbeeld**
+
+```{r}
+library(MASS)
+aantal <- 100
+gemiddeldes <- c(2, 3)
+sigma <- matrix(data = c(9, 6, 6, 16), nrow = 2, byrow = TRUE) # covariantiematrix
+set.seed(04182019)
+df <- mvrnorm(n = aantal, mu = gemiddeldes, Sigma = sigma)
+colnames(df) <- c("x", "y")
+cov(df)
+cor(df)
+```
+
+De hierin gespecificeerde covariantiematrix is
+
+```{r}
+sigma
+```
+
+Hierbij is
+
++ variantie 1e variabele = 9
++ variantie 2e variabele = 16
++ covariantie = 6
+
+Dus correlatiecoëfficient $r(x,y) = \frac{cov(x,y)}{\sigma(x) \sigma(y)} = \frac{6}{\sqrt{9}\sqrt{16}} = \frac{6}{12} = 0.5$
+
+Stel nu dat je met dezelfde varianties voor x en y een correlatiecoefficient van -0.3 wilt hebben, dan moet je de daarbij behorende waarde van de covariantie uitrekenen. En die is $cov = -0.3*\sqrt{9}\sqrt{16} = -3.6$. De covariantiematrix wordt dan
+
+```{r}
+( sigma <- matrix(data = c(9, -3.6, -3.6, 16), nrow = 2, byrow = TRUE) )
+```
+
+Simulatie van de variabelen geeft dan
+
+```{r}
+set.seed(04182019)
+df <- mvrnorm(n = aantal, mu = gemiddeldes, Sigma = sigma)
+cov(df)
+cor(df)
+```
+
+Wanneer je het voorbeeld uitbreid met meer variabelen wordt het snel wat gecompliceerder, maar het principe blijft hetzelfde. Nu met drie variabelen $x_1, x_2, x_3$ waarbij je de volgende varianties en correlatiecoefficienten wilt:
+
+- $var(x_1) = 16 \rightarrow \sigma(x_1) = 4$
+- $var(x_2) = 25 \rightarrow \sigma(x_2) = 5$
+- $var(x_3) = 9 \rightarrow \sigma(x_3) = 3$
+- $r(x_1,x_2) = 0.2$
+- $r(x_1,x_3) = 0.4$
+- $r(x_2,x_3) = 0.6$
+
+Daarna de berekeningen van de covarianties
+
++ $cov(x_1,x_2) = r(x_1,x_2)*\sigma(x_1)*\sigma(x_2) = 0.2*4*5 = 4$
++ $cov(x_1,x_3) = r(x_1,x_3)*\sigma(x_1)*\sigma(x_3) = 0.4*4*3 = 4.8$
++ $cov(x_2,x_3) = r(x_2,x_3)*\sigma(x_2)*\sigma(x_3) = 0.6*5*3 = 9$
+
+De covariantiematrix heeft dan de volgende inhoud
+
+|      |$x_1$               |$x_2$             |$x_3$               |
+|:-----|:-------------------|:-----------------|:-------------------|
+|$x_1$ |$var(x_1) = 16$     |$cov(x_1,x_2) = 4$|$cov(x_1,x_3) = 4.8$|
+|$x_2$ |$cov(x_1,x_2) = 4$  |$var(x_2) = 25$   |$cov(x_2,x_3) = 9$  |
+|$x_3$ |$cov(x_1,x_3) = 4.8$|$cov(x_2,x_3) = 9$|$var(x_3) = 9$      |
+
+```{r}
+aantal <- 100
+gemiddeldes <- c(6, 7, 5)
+sigma <- matrix(data = c(16, 4, 4.8, 4, 25, 9, 4.8, 9, 9), nrow = 3, byrow = TRUE)
+set.seed(04182019)
+df <- mvrnorm(n = aantal, mu = gemiddeldes, Sigma = sigma)
+cov(df)
+cor(df)
+```
+
+### faux
+
+Zie: https://debruine.github.io/faux/articles/rnorm_multi.html
+
+Met de functie `rnorm_multi()` kun je meerdere normaal verdeelde variabelen tegelijk genereren. De werking lijkt veel op mvrnorm uit package MASS, waar volgens mij ook een deel van de functionaliteit vandaan komt.
+
+```{r eval=FALSE}
+library(faux)
+set.seed(49)
+mydat <- rnorm_multi(n = 30, 
+					 mu = c(35, 2000), 
+					 sd = c(10, 500), 
+					 r = 0.6, 
+					 varnames = c("leeftijd", "banksaldo"), 
+					 empirical = FALSE)
+mydat$leeftijd <- round(mydat$leeftijd)
+mydat$banksaldo <- round(mydat$banksaldo)
+head(mydat, 10)
+round(cor(mydat), 2)
+```
+
+### Andere pakketten
+
+**SimMultiCorrData** schijnt veel mogelijkheden te hebben, maar werkt helaas niet met de laatste R versie. Bronnen: [Overzicht](https://rdrr.io/cran/SimMultiCorrData/man/SimMultiCorrData.html) en [GitHub](https://github.com/AFialkowski/SimMultiCorrData) 

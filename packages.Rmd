@@ -82,7 +82,7 @@ Bronnen:
 + [faux](https://debruine.github.io/faux/)
 + [GitHub source code](https://github.com/debruine/faux)
 
-Heeft functies voor het simuleren van categoriale data. Ik zie het gebruik hiervan nog niet zo zitten.
+Heeft vooral functies voor het simuleren van categoriale data. Je kunt er ook gecorreleerde numerieke data mee simuleren.
 
 ## wakefield
 

@@ -1,0 +1,101 @@
+# Lineaire modellen
+
+Bij lineaire regressie heb je ook geschikte datamodellen nodig. Deze zul je vaak zelf moeten maken.
+
+## Model 1
+
+Model: $y = 25 + 3.4 \times x + \epsilon$
+
++ $x \in [5, 15]$ - uniform verdeeld, op 2 decimalen nauwkeurig
++ $\epsilon \in N(0,1)$ - storingsterm
+
+```{r}
+aantal <- 25
+set.seed(24)
+x <- round(runif(n = aantal, min = 5, max = 15), digits = 2)
+eps <- rnorm(n = aantal, mean = 0, sd = 1)
+y <- 25 + 3.4 * x + eps
+```
+
+Beoordeling model
+
+```{r}
+summary(y)
+qplot(x, y) + geom_smooth(method = "lm", formula = y~x, se = FALSE)
+fit <- lm(y ~ x)
+summary(fit)
+knitr::kable(coefficients(summary(fit)), digits=c(1, 2, 1, 4))
+```
+
+Door de kleine waarde van aantal heb je meer kans op afwijkingen van het echte parameters van het model.
+
+## Model 2
+
+In dit voorbeeld worden een aantal evenver van elkaar afliggende x-waarden gegenereerd. De y-waarden komen uit een normale verdeling gecentreerd boven de overeenkomstige x-waarde met een beetje toegevoegde ruis.
+
+```{r}
+aantal = 300
+#set.seed(12)
+x <- seq(from = 1, to = aantal)
+y <- rnorm( n = aantal, mean = x + 2, sd = 25)
+```
+
+Beoordeling model.
+
+```{r}
+df <- data.frame(x = x, y = y)
+ggplot(data = df, aes(x = x, y = y)) +
+	geom_point() + theme_classic() +
+	labs(title = "Dataset voor eenvoudige lineaire regressie") +
+	geom_smooth(method = "lm", formula = y~x, se = FALSE)
+fit <- lm(y ~ x)
+summary(fit)
+knitr::kable(coefficients(summary(fit)), digits=c(2, 2, 1, 4))
+```
+
+## Model 3 (met correlatie)
+
+Stel we willen twee $x$ variabelen genereren met een verwachtte correlatie van $0.6$. Voor het genereren hiervan kun je gebruik maken van het feit dat twee variabelen, $x_1$ en $x_2$, gecorreleerd zijn als ze een "gemeenschappelijke oorzaak" delen - een variabele $z$ die zowel $x_1$ als $x_2$ beïnvloedt (of "veroorzaakt"). Als de verwachte varianties van $x_1$, $x_2$ en $z$ allemaal 1 zijn, dan is de verwachte correlatie tussen $x_1$ en $x_2$ het product van het causale effect van $z$ tot elke $x$. De eenvoudigste manier om dit te implementeren is door simpelweg het effect van $z$ aan beide $x$ gelijk aan $\sqrt{0.6}$ te maken.
+
+```{r}
+n <- 1000
+z <- rnorm(n, mean = 0, sd = 1) # de gemeenschappelijke oorzaak, met sigma = 1
+rho <- 0.6    # de werkelijke correlatie tussen x1 en x2
+beta_z <- sqrt(rho) # de gemakkelijkste manier om effecten van  op x1 en x2 te krijgen die rho genereren
+sigma_x <- sqrt(1 - rho) # de variantie van X1 and X2 wordt 1, dus de "verklaarde" variantie in x is beta_z^2 = rho, de wortel van de onverklaarbare variantie
+x1 <- beta_z*z + rnorm(n, sd = sigma_x)
+x2 <- beta_z*z + rnorm(n, sd = sigma_x)
+# check
+cov(data.frame(X1=x1, X2 = x2)) # liggen de waarden op de diagonaal dicht bij 1?
+cor(x1, x2) # ligt de waarde dicht bij rho?
+qplot(x1, x2)
+```
+
+Genereer nu $y$ als functie van $x_1$ en $x_2$.
+
+Model: $y = b_0 + b_1 \times x_1 + b_2 \times x_2 + \epsilon$
+
+Genereer gestandaardiseerde data met $\sigma_Y = 1$.
+
+```{r}
+b_0 <- 3.2
+b_1 <- 0.7
+b_2 <- -0.3
+explained_sigma <- b_1^2 + b_2^2 + 2*b_1*b_2*rho # Wright's rules! Vergelijk met Trig!
+sigma_Y.X <- sqrt(1 - explained_sigma) # sqrt onverklaarde variantie
+y <- b_0 + b_1*x1 + b_2*x2 + rnorm(n, sd=sigma_Y.X)
+
+# controle
+var(y) # moet dichter bij 1 zijn naarmate n groter wordt 
+
+# controleer parameters
+coef(summary(lm(y ~ x1 + x2))) # moet dichter bij de parameters zijn naarmate n groter wordt
+```
+
+Merk op dat de variantie van $y$ de variantie is van het verklaarde deel als gevolg van $X_1$ en $X_2$ en het onverklaarde deel. En als de verwachte variantie van $Y = 1$ dan zorgt dit voor een bovengrens voor het verklaarde deel. Dit betekent dat 
+
+\begin{equation}
+b_1^2 + b_2^2 + 2 b_1 b_2 \rho < 1
+\end{equation}
+
+wat betekent dat de grootte van $b_1$ en $b_2$ over het algemeen kleiner moet zijn dan 1.

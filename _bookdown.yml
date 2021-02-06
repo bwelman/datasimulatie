@@ -25,5 +25,8 @@ rmd_files:
   - "index.Rmd"
   - "variabelen.Rmd"
   - "afhankelijke-data.Rmd"
+  - "linmodels.Rmd"
+  - "functies.Rmd"
   - "packages.Rmd"
+  - "experimenten.Rmd"
   - "referenties.Rmd"
