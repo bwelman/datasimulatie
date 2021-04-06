@@ -14,7 +14,9 @@ aantal <- 25
 set.seed(24)
 x <- round(runif(n = aantal, min = 5, max = 15), digits = 2)
 eps <- rnorm(n = aantal, mean = 0, sd = 1)
-y <- 25 + 3.4 * x + eps
+b0 <- 25
+b1 <- 3.4
+y <- b0 + b1 * x + eps
 ```
 
 Beoordeling model
@@ -78,12 +80,12 @@ Model: $y = b_0 + b_1 \times x_1 + b_2 \times x_2 + \epsilon$
 Genereer gestandaardiseerde data met $\sigma_Y = 1$.
 
 ```{r}
-b_0 <- 3.2
-b_1 <- 0.7
-b_2 <- -0.3
-explained_sigma <- b_1^2 + b_2^2 + 2*b_1*b_2*rho # Wright's rules! Vergelijk met Trig!
+b0 <- 3.2
+b1 <- 0.7
+b2 <- -0.3
+explained_sigma <- b1^2 + b2^2 + 2*b1*b2*rho # Wright's rules! Vergelijk met Trig!
 sigma_Y.X <- sqrt(1 - explained_sigma) # sqrt onverklaarde variantie
-y <- b_0 + b_1*x1 + b_2*x2 + rnorm(n, sd=sigma_Y.X)
+y <- b0 + b1*x1 + b2*x2 + rnorm(n, sd = sigma_Y.X)
 
 # controle
 var(y) # moet dichter bij 1 zijn naarmate n groter wordt 
@@ -99,3 +101,21 @@ b_1^2 + b_2^2 + 2 b_1 b_2 \rho < 1
 \end{equation}
 
 wat betekent dat de grootte van $b_1$ en $b_2$ over het algemeen kleiner moet zijn dan 1.
+
+## Model 4
+
+Model: $y = b_0 + b_1 \times x_1 + b_2 \times x_2 + \epsilon$
+
+```{r}
+set.seed(123)
+aantal <- 100
+k <- 2        # aantal voorspellende variabelen
+x <- matrix(data = rnorm(aantal * k), ncol = k)
+b0 <- -0.5
+b1 <- 0.2
+b2 <- 0.1
+eps <- rnorm(n = aantal, sd = 0.5)
+y <- b0 + b1*x[,1] + b2*x[,2] + eps
+mydf <- data.frame(x,y)
+```
+

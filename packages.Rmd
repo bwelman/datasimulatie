@@ -5,8 +5,6 @@ De hier genoemde packages zijn nog niet of beperkt onderzocht.
 
 Zie ook het artikel [Fake Data with R](https://rviews.rstudio.com/2020/09/09/fake-data-with-r/)
 
-En [Experimental-data-simulation](https://github.com/pablobernabeu/Experimental-data-simulation)
-
 ## simstudy
 
 Dit is een package ontwikkeld door Keith Goldfeld met als doel om op een gemakkelijke manier data te kunnen genereren voor simulaties en onderwijs.
@@ -81,6 +79,7 @@ Bronnen:
 
 + [faux](https://debruine.github.io/faux/)
 + [GitHub source code](https://github.com/debruine/faux)
++ [Tutorial](https://debruine.github.io/tutorials/sim-data.html)
 
 Heeft vooral functies voor het simuleren van categoriale data. Je kunt er ook gecorreleerde numerieke data mee simuleren.
 
@@ -91,8 +90,31 @@ Bronnen:
 + [github](https://github.com/trinker/wakefield)
 + [Richard Vogg](https://r-vogg-blog.netlify.app/posts/2020-12-03-useful-packages-for-data-composition/#wakefield)
 
-##GenOrd
+## GenOrd
 
 Wordt sinds 2015 niet meer bijgehouden lijkt me.
 
-Deze package helpt om discrete willekeurige variabelen te creëren met voorgeschreven correlatiematrix en marginale verdelingen. 
+Deze package helpt om discrete willekeurige variabelen te creëren met voorgeschreven correlatiematrix en marginale verdelingen.
+
+## SimMultiCorrData
+
+[GitHub](https://github.com/AFialkowski/SimMultiCorrData), laatste update 28-06-2018
+
+Simulatie van gecorreleerde data met meerdere varaiabele types.
+
+Interessant pakket, moet nog verder bestudeerd worden.
+
+Zo kun je met de functie `calc_theory()` statistische kenmerken voor veel theoretische continue verdelingen vinden.
+
+```{r}
+library(SimMultiCorrData)
+options(scipen = 100) # disable exponentiele notatie
+calc_theory(Dist = "Exponential", params = 0.5)
+```
+
+
+
+
+
+
+
