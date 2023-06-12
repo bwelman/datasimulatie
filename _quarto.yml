@@ -1,0 +1,38 @@
+project:
+  type: book
+
+book:
+  title: "Datasimulatie met R"
+  author: "Ben Welman"
+  date: last-modified
+  date-format: long
+  description: "Een verzameling notities over het genereren van data met R."
+  chapters:
+    - index.qmd
+    - variabelen.qmd
+    - afhankelijke-data.qmd
+    - linmodels.qmd
+    - functies.qmd
+    - experimenten.qmd
+    - referenties.qmd
+
+lang: nl
+
+execute:
+  freeze: auto
+
+format:
+  html:
+    theme: cosmo
+    fig-width: 6
+    fig-asp: 0.618
+    code-fold: false
+    link-external-newwindow: true
+    callout-appearance: simple
+
+knitr:
+  opts_chunk:
+    echo: true
+    warning: false
+    message: false
+    cache: false

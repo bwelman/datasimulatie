@@ -1,0 +1,178 @@
+# Lineaire modellen {#sec-linmodels}
+
+{{< include _setup.qmd >}}
+
+Bij lineaire regressie heb je ook geschikte datamodellen nodig. Deze zul je vaak zelf moeten maken.
+
+## Model 1
+
+Model: $y = 25 + 3.4 \cdot x + \epsilon$
+
+-   $x \in [5, 15]$ - uniform verdeeld, op 2 decimalen nauwkeurig
+-   $\epsilon \in N(0,1)$ - storingsterm
+
+```{r}
+aantal <- 25
+set.seed(24)
+x <- round(runif(n = aantal, min = 5, max = 15), digits = 2)
+eps <- rnorm(n = aantal, mean = 0, sd = 1)
+b0 <- 25
+b1 <- 3.4
+y <- b0 + b1 * x + eps
+```
+
+Beoordeling model
+
+```{r}
+summary(y)
+ggplot(mapping = aes(x, y)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", formula = y~x, se = FALSE)
+fit <- lm(y ~ x)
+summary(fit)
+knitr::kable(coefficients(summary(fit)), digits=c(1, 2, 1, 4))
+```
+
+Door de kleine waarde van aantal heb je meer kans op afwijkingen van het echte parameters van het model.
+
+## Model 2
+
+In dit voorbeeld worden een aantal evenver van elkaar afliggende x-waarden gegenereerd. De $y$-waarden komen uit een normale verdeling gecentreerd boven de overeenkomstige $x$-waarde met een beetje toegevoegde ruis.
+
+```{r}
+aantal = 300
+#set.seed(12)
+x <- seq(from = 1, to = aantal)
+y <- rnorm( n = aantal, mean = x + 2, sd = 25)
+```
+
+Beoordeling model.
+
+```{r}
+df <- data.frame(x = x, y = y)
+ggplot(data = df, aes(x = x, y = y)) +
+	geom_point() + theme_classic() +
+	labs(title = "Dataset voor eenvoudige lineaire regressie") +
+	geom_smooth(method = "lm", formula = y~x, se = FALSE)
+fit <- lm(y ~ x)
+summary(fit)
+knitr::kable(coefficients(summary(fit)), digits=c(2, 2, 1, 4))
+```
+
+## Model 3 (met correlatie)
+
+Stel we willen twee $x$ variabelen genereren met een verwachtte correlatie van $0.6$. Voor het genereren hiervan kun je gebruik maken van het feit dat twee variabelen, $x_1$ en $x_2$, gecorreleerd zijn als ze een "gemeenschappelijke oorzaak" delen - een variabele $z$ die zowel $x_1$ als $x_2$ beïnvloedt (of "veroorzaakt"). Als de verwachte varianties van $x_1$, $x_2$ en $z$ allemaal 1 zijn, dan is de verwachte correlatie tussen $x_1$ en $x_2$ het product van het causale effect van $z$ tot elke $x$. De eenvoudigste manier om dit te implementeren is door simpelweg het effect van $z$ aan beide $x$ gelijk aan $\sqrt{0.6}$ te maken.
+
+```{r}
+n <- 1000
+z <- rnorm(n, mean = 0, sd = 1) # de gemeenschappelijke oorzaak, met sigma = 1
+rho <- 0.6    # de werkelijke correlatie tussen x1 en x2
+beta_z <- sqrt(rho) # de gemakkelijkste manier om effecten van  op x1 en x2 te krijgen die rho genereren
+sigma_x <- sqrt(1 - rho) # de variantie van X1 and X2 wordt 1, dus de "verklaarde" variantie in x is beta_z^2 = rho, de wortel van de onverklaarbare variantie
+x1 <- beta_z*z + rnorm(n, sd = sigma_x)
+x2 <- beta_z*z + rnorm(n, sd = sigma_x)
+# check
+cov(data.frame(X1=x1, X2 = x2)) # liggen de waarden op de diagonaal dicht bij 1?
+cor(x1, x2) # ligt de waarde dicht bij rho?
+ggplot(mapping = aes(x1, x2)) + 
+  geom_point()
+```
+
+Genereer nu $y$ als functie van $x_1$ en $x_2$.
+
+Model: $y = b_0 + b_1 \cdot x_1 + b_2 \cdot x_2 + \epsilon$
+
+Genereer gestandaardiseerde data met $\sigma_Y = 1$.
+
+```{r}
+b0 <- 3.2
+b1 <- 0.7
+b2 <- -0.3
+explained_sigma <- b1^2 + b2^2 + 2*b1*b2*rho # Wright's rules! Vergelijk met Trig!
+sigma_Y.X <- sqrt(1 - explained_sigma) # sqrt onverklaarde variantie
+y <- b0 + b1*x1 + b2*x2 + rnorm(n, sd = sigma_Y.X)
+
+# controle
+var(y) # moet dichter bij 1 zijn naarmate n groter wordt 
+
+# controleer parameters
+coef(summary(lm(y ~ x1 + x2))) # moet dichter bij de parameters zijn naarmate n groter wordt
+```
+
+Merk op dat de variantie van $y$ de variantie is van het verklaarde deel als gevolg van $X_1$ en $X_2$ en het onverklaarde deel. En als de verwachte variantie van $Y = 1$ dan zorgt dit voor een bovengrens voor het verklaarde deel. Dit betekent dat
+
+$$b_1^2 + b_2^2 + 2 b_1 b_2 \rho < 1$$
+
+wat betekent dat de grootte van $b_1$ en $b_2$ over het algemeen kleiner moet zijn dan 1.
+
+## Model 4
+
+Model: $y = b_0 + b_1 \cdot x_1 + b_2 \cdot x_2 + \epsilon$
+
+```{r}
+set.seed(123)
+aantal <- 100
+k <- 2        # aantal voorspellende variabelen
+x <- matrix(data = rnorm(aantal * k), ncol = k)
+b0 <- -0.5
+b1 <- 0.2
+b2 <- 0.1
+eps <- rnorm(n = aantal, sd = 0.5)
+y <- b0 + b1*x[,1] + b2*x[,2] + eps
+mydf <- data.frame(x,y)
+```
+
+## Model 5
+
+Model: $y = b_0 + b_1 \cdot x + \epsilon$ met
+
+$x \in N(0,1)$, $\epsilon \in N(0,2)$, $b_0 = 0.5$ en $b_1 = 2$
+
+```{r}
+set.seed(20)
+x <- rnorm(n = 100, mean = 0, sd = 1)
+eps <- rnorm(n = 100, mean = 0, sd = 2)
+b0 <- 0.5
+b1 <- 2
+y <- b0 + b1*x + eps
+summary(y)
+plot(x, y)
+```
+
+## Model 6
+
+het volgende voorbeeld is geproduceerd door ChatGPT.
+
+Model: $y = 2 \cdot x + \epsilon$ met
+
+$x \in N(0, 1)$, $\epsilon \in N(0, 0.5)$
+
+```{r}
+set.seed(123)
+n <- 100  # aantal waarnemingen
+x <- rnorm(n, mean = 0, sd = 1)
+y <- 2*x + rnorm(n, mean = 0, sd = 0.5)
+mydata <- data.frame(x, y)
+
+# Zet gegevens in een grafiek om te zien hoe het eruit ziet.
+ggplot(mydata, aes(x, y)) +
+  geom_point() +
+  labs(x = "Onafhankelijke variabele", y = "Afhankelijke variabele")
+```
+
+Maak een lineair model met functie `lm()`.
+
+```{r}
+model <- lm(y ~ x, data = mydata)
+summary(model)
+```
+
+Visualiseer de resultaten door de voorspelde waarden uit te zetten tegen de werkelijke waarden.
+
+```{r}
+ggplot(mydata, aes(x, y)) +
+  geom_point() +
+  geom_line(aes(x, predict(model)), color = "red", size = 1) +
+  labs(x = "Onafhankelijke variabele", y = "Afhankelijke variabele")
+```
+

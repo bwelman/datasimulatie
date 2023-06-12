@@ -1,0 +1,109 @@
+# Nuttige Functies {#sec-functies}
+
+{{< include _setup.qmd >}}
+
+## Replicate
+
+Met de functie `replicate()` kun je een expressie herhaald uitvoeren, dus ook een expressie die waarden genereert. De functie heeft drie argumenten:
+
+-   `n` - het aantal keren dat de expressie herhaald moet worden
+-   `expr` - de te herhalen expressie of code (vaak een functie)
+-   `simplify` - waarmee de vorm van de uitvoer geregeld wordt. De default waarde `TRUE` plaatst het resultaat in een array en de waarde `FALSE` in een list.
+
+Als voorbeeld een herhaalde uitvoering van een aantal trekkingen uit een normale verdeling. Je zou een dergelijk experiment kunnen gebruiken voor een demonstratie van de centrale limietstelling.
+
+Eerst het resultaat in een list.
+
+```{r}
+set.seed(15)
+replicate(n = 4,
+          expr = rnorm(n = 5, mean = 0, sd = 1),
+          simplify = FALSE)
+```
+
+En nu het resultaat in een array.
+
+```{r}
+set.seed(15)
+replicate(n = 4,
+          expr = rnorm(n = 5, mean = 0, sd = 1),
+          simplify = TRUE)
+```
+
+**Voorbeeld met een dataset**
+
+```{r}
+simlist <- replicate(n = 3,
+                      expr = data.frame(groep = rep(letters[1:2], each = 3),
+                                        waarneming = rnorm(n = 6, mean = 0, sd = 1)),
+                      simplify = FALSE)
+```
+
+Het resultaat is een list van drie dataframes.
+
+```{r}
+str(simlist)
+
+# Het eerste dataframe
+simlist[1]
+```
+
+**Worpen met munt**
+
+Een experiment bestaat uit 5 worpen met een eerlijke munt waarbij het aantal keren kop geteld wordt. Dit experiment wordt 100 keer herhaald. Het resultaat van elk experiment wordt opgeslagen in `koppen`.
+
+```{r}
+koppen <- replicate(100, sample(0:1, 5, TRUE) %>% sum())   
+table(koppen) # aantallen
+table(koppen)/100 # fracties
+```
+
+## Schudden
+
+### Vector
+
+Wanneer je de rijen van een vector willekeurig wilt schudden dan kan dat met de functie `sample()`.
+
+**Voorbeeld: Schoenmaten Nederlandse man**
+
+De webshop [schoenspannersshop](https://schoenspannersshop.nl/) heeft op basis van meer dan 3000 verkochte schoenspanners de [onderzoeksresultaten](https://www.persbericht.nu/schoenmaat-en-maatverdeling-van-de-nederlandse-man/) gepubliceerd van de schoenmaatverdeling van de Nederlandse man.
+
+```{r}
+mydf <- data.frame(Maat = c(38:47), Fractie = c(0.010, 0.019, 0.052, 0.091, 0.239, 0.245, 0.175, 0.096, 0.056, 0.017))
+knitr::kable(mydf, caption = "Schoenmaten Nederlandse man 2013")
+```
+
+Op basis hiervan heb ik 3000 schoenmaten gegenereerd volgens de aangegeven verdeling.
+
+```{r}
+n = 3000
+aantallen <- round(n * mydf$Fractie, 0)
+sum(aantallen)
+schoenmaten <- rep(mydf$Maat, times = aantallen)
+set.seed(45)
+schoenmaten <- sample(schoenmaten)
+table(schoenmaten)
+```
+
+Je kunt dit naar een csv bestand zonder rij- en kolomnamen schrijven met de volgende opdracht:
+
+```{r eval=FALSE}
+write.table(schoenmaten, file = "data/schoenmaten.csv", row.names = FALSE, col.names = FALSE)
+```
+
+### Data frame
+
+```{r eval=FALSE}
+newdf <- df[sample(nrow(df)),] # schudden
+rownames(newdf) <- NULL        # reset index
+```
+
+Je kunt hiervoor een functie maken:
+
+```{r eval=FALSE}
+shuffle <- function(df) {
+	df <- df[sample(nrow(df)),] # shuffle
+	rownames(df) <- NULL        # reset index
+	return(df)
+}
+```

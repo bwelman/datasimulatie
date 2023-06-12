@@ -1,0 +1,10 @@
+# Inleiding
+
+Deze handleiding bevat een aantal notities over methodes om data te genereren met R.
+
+Wat je meestal doet is het volgende
+
+1.  Simuleer kwantitatieve variabelen via het genereren van willekeurige getallen met `rnorm()`, `runif()`, `rpois()`, ....
+2.  Genereer karaktervariabelen die groepen vertegenwoordigen via `rep()`.
+3.  Genereer gegevens met zowel kwantitatieve als categorische variabelen, gebruikmakend van functies uit de eerste twee stappen.
+4.  Gebruik `replicate()` om het gegevenssimulatieproces vele malen te herhalen.

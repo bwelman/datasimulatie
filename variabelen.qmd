@@ -1,0 +1,476 @@
+# Variabelen {#sec-variabelen}
+
+{{< include _setup.qmd >}}
+
+## Categorieën
+
+Categorievariabelen dienen vaak als een soort groeperings- of behandelingsvariabele, met meerdere individuen/observaties per groep/behandeling. Dit betekent dat je herhalingen van elke categorie moet hebben. Dat kan met de functie `rep()`.
+
+    rep(x, times)      # herhaalt hele vector het gewenste aantal keren
+    rep(x, length.out) # herhaalt hele vector tot gewenste lengte
+    rep(x, each)       # herhaalt elk element van de vector
+
+### Letters alfabet
+
+```{r}
+rep(LETTERS[1:5], times = 3)
+rep(letters[1:2], times = c(2, 4))
+rep(letters[1:2], each = 3)
+rep(letters[1:3], length.out = 10)
+```
+
+**Combinatie van `each` met `times`.**
+
+Herhaal elk element 2 keer en dan dit patroon 3 keer.
+
+```{r}
+rep(letters[1:2], each = 2, times = 3)
+```
+
+**Combinatie van `each` met `length.out`.**
+
+```{r}
+rep(letters[1:2], each = 2, length.out = 9)
+```
+
+### Maanden
+
+Er zijn twee ingebouwde constanten voor de Engelstalige maanden van het jaar: `month.name` voor de volledige namen en `month.abb` voor de drieletter afkortingen.
+
+```{r}
+month.name
+month.abb
+```
+
+Ook hierop kun je de functie `rep()` toepassen.
+
+```{r}
+rep(month.abb[1:3], 4)
+```
+
+Ik heb Nederlandstalige definities voor de maandnamen gemaakt en opgenomen in de eigen package `swrtools`
+
+```{r}
+month.abb.nl
+month.name.nl
+```
+
+### Strings
+
+```{r}
+verkopers <- c("Jansen", "Pietersen", "Klaassen")
+rep(verkopers, each = 2)
+steden <- c("Enschede", "Hengelo", "Almelo")
+rep(steden, times = 3)
+```
+
+Twee nuttige functies voor het combineren van strings zijn `sprintf()` en `paste()`. Deze kunnen goed gebruikt worden bij het maken van labels.
+
+Om de labels "H1", "H2", ..., "H9" te maken kun je deze natuurlijk intypen, maar ook gebruik maken van een format template "H%s". Hierin wordt `%s` gevuld met een string.
+
+```{r}
+sprintf("H%s", 1:9)
+
+# alternatief
+paste("H", 1:9, sep="")
+```
+
+### Persoonsnamen
+
+Vaak gebruik ik voor namen de bekende kleurtjes:
+
+```{r}
+KleurPersonen <- data.frame(
+	Naam = c("An Azuur", "Berend Blauw", "Chris Cyaan", "Gerrit Groen", "Ivo Indigo", "Mari Magenta", "Otto Oranje", "Peter Paars", "Roger Rood", "Stan Sepia", "Trudy Turkoois", "Vicky Violet", "Willem Wit", "Zorro Zwart"), 
+	Sexe = c("v", "m", "m", "m", "m", "v","m", "m", "m", "m", "v", "v", "m", "m")
+	)
+knitr::kable(KleurPersonen)
+```
+
+### Factor levels
+
+Voor het genereren van een regelmatig patroon van factor levels kun je de functie `gl()` gebruiken.
+
+`gl(n, k, length = n*k, labels = seq_len(n), ordered = FALSE)`
+
++ `n` : een geheel getal voor het aantal levels.
+
++ `k`	: een geheel voor het aantal herhalingen van elke level.
+
++ `length` : een geheel getal voor het totaal aantal te genereren levels.
+
++ `labels` : een optionele vector met labels voor de factor levels.
+
++ `ordered`	: een logische waarde om aan te geven of het resultaat geordend moet zijn.
+
+```{r}
+gl(n=3, k=2, length=7, labels = c("Enschede", "Hengelo", "Almelo"))
+gl(n=2, k=5)
+```
+
+## Getallen
+
+### Reeksen
+
+**Opeenvolgend**
+
+Het genereren van reeksen van opeenvolgende gehele getallen gaat het eenvoudigst met de **dubbele punt** operator .Het resultaat bestaat uit alle gehele getallen tussen het aantal voor de dubbele punt en het aantal na de dubbele punt, inclusief de grenswaarden. De volgorde kan oplopend of aflopend zijn.
+
+```{r}
+x <- 1:10
+x
+y <- 6:-3
+y
+```
+
+**Vaste stapgrootte met `seq()`**
+
+Voor reeksen van reële getallen of reeksen met een vaste stapgrootte ertussen gebruik je de functie `seq(from, to, by)`.
+
+```{r}
+seq(from = 10, to = 12, by = 0.4)
+```
+
+**Herhalingen met `rep()`**
+
+Voor reeksen met herhalingen van waarden kun je de functie `rep(x, ...)` gebruiken, waarbij x een vectoris . Syntax:
+
+-   `rep(x, times = 1)` - voor het aantal keren dat vector x herhaald moet worden
+-   `rep(x, each = 1)` - elke unieke waarde van vector x wordt een aantal keren herhaald
+-   `rep(x, length.out = NA)` - gewenste totale lengte uitvoer. Het argument mag ook afgekort worden tot `len`.
+
+```{r}
+rep(3, times = 5)
+rep(1:4, len = 10)
+rep(1:4, times = c(2,3,1,2)) # deze constructie kan alleen met times
+rep(1:4, each = 2)
+rep(1:4, each = 2, len = 6) # combinatie van argumenten
+rep(1:4, each = 2, times = 3)
+```
+
+### Verdelingen
+
+De functies `rnorm()`, `runif()`, ... genereren reële getallen. Wanneer je gehele getallen wilt, dan kun je deze functies ook gebruiken, samen met de afrondingsfunctie `round()` en `as.integer()` voor de type conversie. Om de random generator op een specifiek punt te starten kun je de functie `set.seed()` gebruiken. Een andere optie is om de functie `sample()` (zie verderop) te gebruiken.
+
+#### Normale verdeling `rnorm()`
+
+Trekking uit een Normale verdeling, default `rnorm(n, mean = 0, sd = 1)`
+
+```{r}
+set.seed(16)
+x <- rnorm(n = 1000, mean = 65, sd = 3)
+ggplot(mapping=aes(x)) + geom_histogram()
+```
+
+Je kunt aselecte getallen uit meerdere verschillende normale verdelingen krijgen door een vector voor de parameters `mean` en `sd` te gebruiken. Dit kan nuttig zijn wanneer bijvoorbeeld data wilt simuleren voor een ANOVA analyse van een experiment met verschillende groepsgemiddeldes maar met dezelfde variantie.
+
+```{r}
+rnorm(n = 10, mean = c(5, 8, 12), sd = 1)
+```
+
+De functie trekt achter elkaar een waarde uit elke verdeling tot het aantal opgegeven getallen bereikt is.
+
+#### Uniforme verdeling `runif()`
+
+Trekking uit een Uniforme verdeling, default `runif(n, min = 0, max = 1)`
+
+Wanneer je getallen wilt genereren die strikt positief en continu zijn kan het gebruik hiervan erg nuttig zijn.
+
+```{r}
+x <- runif(n = 1000, min = 10, max = 20)
+ggplot(mapping=aes(x)) + geom_histogram()
+```
+
+Wanneer je gehele getallen wilt hebben die ook nog eens van het type integer zijn kun je ook de functies `round()` en `as.integer()` gebruiken.
+
+```{r}
+as.integer(round(runif(n = 10, min = 40, max = 60)))
+```
+
+#### Poisson verdeling `rpois()`
+
+Voor discrete aantallen.
+
+Trekking uit een Poisson verdeling `rpois(n, lambda)` met
+
+-   gemiddelde = `lambda`
+-   variantie = `lambda`
+
+Het argument *lambda* is het gemiddelde, heeft geen default waarde en moet een niet-negatief getal zijn (integer hoeft niet). Je kunt de functie goed gebruiken voor bijvoorbeeld het genereren van frequenties van waarden.
+
+```{r}
+x <- rpois(n = 100, lambda = 3.5)
+ggplot(mapping=aes(x)) + geom_histogram()
+```
+
+#### Negatief binomiale verdeling `rbinom()`
+
+Trekking uit een negatief binomiale verdeling `rbinom(n, size, prob)` met
+
+-   `size` - aantal pogingen
+-   `prob` - kans op succes voor elke poging
+
+Voorbeeld van een fabriek welke 150 producten per week maakt. Bij de eindcontrole wordt gemiddeld bij 5% van de producten een fout aangetroffen die gerepareerd moeten worden. Simuleer het aantal foute producten voor 10 weken.
+
+```{r}
+x <- rbinom(n = 600, size = 150, prob = 0.05)
+ggplot(mapping=aes(x)) + geom_histogram()
+```
+
+#### Exponentiële verdeling `rexp()`
+
+Trekking uit een exponentiële verdeling `rexp(n, rate = 1)` met
+
+-   ``` rate`` - met verwachting is ```1/rate\`
+
+De verdeling is goed te gebruiken voor data met uitschieters.
+
+```{r}
+x <- rexp(1000,rate=0.01)
+ggplot(mapping=aes(x)) + geom_histogram()
+```
+
+### pmax() en pmin()
+
+`pmax()` en `pmin()` nemen een of meer vectoren als argumenten, recyclen ze tot een gemeenschappelijke lengte en retourneren een enkele vector die de 'parallel' maxima (of minima) van de argumentvectoren geeft.
+
+In het voorbeeld hierna zijn `x1` en `x2` vectoren van gelijke lengte. De functies `pmax()` en `pmin()` vergelijken de vectoren elementsgewijs en nemen dan respectievelijk de grootste of de kleinste waarde. De resultaatvector is evenlang als de argumentvectoren.
+
+```{r}
+x1 <- c(3, 9, 4, 5, 2, 6)
+x2 <- c(1, 8, 6, 6, 7, 0)
+pmax(x1, x2)
+pmin(x1, x2)
+```
+
+Je kunt deze functies gebruiken in combinatie met trekkingen uit verdelingen om zodoende waarden te kijgen boven of onder een bepaalde limietwaarde.
+
+```{r}
+x <- c(12, 19, 34, 71, 43, 10, 52, 68)
+x
+pmax(x, 18) # Zorgt voor een ondergrens van 18
+pmin(x, 65) # Zorgt voor een bovengrens van 65
+```
+
+## sample()
+
+De functie `sample()` trekt een aantal waarden willekeurig uit een verzameling met of zonder teruglegging. Je kunt deze functie gebruiken voor het simuleren van discrete gegevens (nominaal, ordinaal).
+
+Syntax: `sample(x, size, replace = FALSE, prob = NULL)`
+
+-   `x` - vector met waarden waaruit getrokken gaat worden.
+-   `size` - het aantal te trekken waarden (grootte steekproef)
+-   `replace` - voor met (TRUE) of zonder (FALSE) teruglegging
+-   `prob` - een vector met de kansen voor de onderdelen van x (facultatief). Wanneer deze wordt weggelaten hebben alle onderdelen dezelfde kans.
+
+**Voorbeeld dobbelsteen**
+
+```{r}
+# Vijftig worpen met een 6-kantige dobbelsteen
+worp <- sample(1:6, size = 50, replace = TRUE)
+table(worp)
+```
+
+**Voorbeeld oneerlijke munt**
+
+Stel dat je nu 100 worpen wilt simuleren met een oneerlijke munt, waarvan de kans op kop 0.7 is en de kans op munt is 0.3. De kop wordt weergegeven met de waarde 1 en de munt met waarde 0.
+
+```{r}
+worp <- sample(c("munt", "kop"), size = 100, replace = TRUE, prob = c(0.3, 0.7))
+table(worp)
+
+# alternatief
+worp <- sample(0:1, size = 100, replace = TRUE, prob = c(0.3, 0.7))
+table(worp)
+```
+
+**Voorbeeld Lotto (6 uit 49)**
+
+```{r}
+sample(1:49, size = 6, replace = FALSE) %>% sort()
+```
+
+**Voorbeeld letters**
+
+LETTERS is een voor gedefinieerde variabele, bestaande uit een vector die alle 26 letters van het Engelse alfabet bevat.
+
+```{r}
+# Willekeurig arrangement (permutatie) van 5 letters
+sample(LETTERS, 5)
+```
+
+**Voorbeeld ordinale data**
+
+```{r}
+beoordeling <- sample(c("lelijk", "neutraal", "mooi"), size = 50, replace = TRUE)
+table(beoordeling)
+```
+
+```{r}
+beoordeling <- sample(c("lelijk", "neutraal", "mooi"), size = 500, replace = TRUE, prob = c(0.2, 0.5, 0.3))
+beoordeling <- factor(beoordeling, levels = c("lelijk", "neutraal", "mooi"), ordered = TRUE)
+```
+
+**Voorbeeld data frame**
+
+Trekking van 5 personen uit de eerder gedefinieerde data frame KleurPersonen. De functie `sample()` wordt hier toegepast op de vector met rijnummers.
+
+```{r}
+KleurPersonen[sample(nrow(KleurPersonen), size = 5, replace = FALSE), ]
+```
+
+**Voorbeeld met kansverdeling**
+
+Trekking van 30 beroepen uit een verzameling \[arts, leraar, politieagent\] waarbij ongeveer de helft uit leraar moet bestaan.
+
+```{r}
+sample(c("arts", "leraar", "politieagent"), size = 30, replace = TRUE, prob = c(0.25, 0.50, 0.25)) %>% table()
+```
+
+De getallen in `prob` geven gewichten aan. Ze mogen niet negatief zijn en ook niet allemaal 0. De som hoeft ook niet 1 te zijn. Intern worden de gewichten omgerekend naar kansen. Zo zorgt `prob = c(1, 2, 3)` voor respectievelijke kansen van 1/6, 2/6 en 3/6.
+
+**Complexer voorbeeld met kansen**
+
+Bij 200 trekkingen uit de getallen 1 t/m 10 moet ca. 50% uit het getal 7 bestaan. De kansen op de andere getallen zijn allemaal even groot. Ken je nu aan de getallen 1 t/m 6 en 7 t/m 10 een gewicht van 1 toe, dan is de som van deze gewichten 9. Aan het getal 7 moet dan het gewicht 9 toegekend worden. Om te controleren of ongeveer de helft uit 7 bestaat gaat aardig met een staafdiagram.
+
+```{r}
+set.seed(28)
+trekking <- sample(1:10, size = 200, replace = TRUE, prob = c(rep(1, 6), 9, rep(1, 3)))
+trekking %>% table()
+ggplot(mapping=aes(trekking == 7)) + geom_bar()
+```
+
+## Data frames
+
+Je kunt eenvoudig afzonderlijke variabelen combineren in een data frame.
+
+```{r, fig.width=5, fig.height=4}
+#| fig-width: 5
+#| fig-height: 4
+
+aantal = 1000
+id <- 1:aantal
+leeftijd <- rnorm(n = aantal, mean = 50, sd = 15)
+instrument <- sample(c("Guitaar", "Piano", "Trompet"), size = aantal, replace = TRUE, prob = c(4,2,1))
+df <- data.frame( id,
+				  leeftijd = round(leeftijd),
+				  instrument)
+
+ggplot(data = df, aes(x=instrument, y=leeftijd)) + geom_boxplot()
+```
+
+### Data zonder verschillen tussen twee groepen
+
+```{r}
+data.frame(groep = rep(letters[1:2], each = 4),
+           respons = rnorm(n = 8, mean = 6, sd = 2))
+```
+
+En met nog een tweede categorievariabele.
+
+```{r}
+data.frame(groep = rep(letters[1:2], each = 4),
+           factor = rep(LETTERS[3:6], times = 2),
+           respons = rnorm(n = 8, mean = 6, sd = 2))
+```
+
+### Data met verschillen tussen twee groepen
+
+-   groep "A" met responswaarden uit N(5,1)
+-   groep "B" met responswaarden uit N(10,1)
+
+Je moet hier rekening houden met hoe de functie `rnorm()` werkt met een vector van gemiddelden. De functie trekt achtereenvolgens uit elke verdeling. Dus moet de categorievector als geheel herhaald worden en niet elementsgewijs.
+
+```{r}
+data.frame(groep = rep(LETTERS[1:2], length.out = 6),
+           respons = rnorm(n = 6, mean = c(5, 10), sd = 1))
+```
+
+### Data met twee kwantitatieve variabelen en twee groepen
+
+Twee groepen, A en B, met 10 waarnemingen per groep.
+
+-   variabel x uit \[10,15\]
+-   variabele y uit \[100, 150\]
+
+Voor twee groepen met 10 waarnemingen per groep moet je dus 2\*10=20 trekkingen doen.
+
+```{r}
+data.frame(groep = rep(LETTERS[1:2], each = 10),
+           x = runif(n = 20, min = 10, max = 15),
+           y = runif(n = 20, min = 100, max = 150))
+```
+
+### Alle combinaties van factor variabelen
+
+Met de functie `expand.grid()` kun je een data frame maken met alle combinaties van de gespecificeerde factor variabelen.
+
+`expand.grid(..., KEEP.OUT.ATTRS = TRUE, stringsAsFactors = TRUE)`
+
+```{r}
+mydf <- expand.grid(lengte = seq(60, 80, 10), gewicht = seq(65, 95, 10), sex = c("Man","Vrouw"))
+mydf
+```
+
+## Datum en tijd
+
+### Datums
+
+Een reeks datums kun je genereren met de functie `seq()`.
+
+`seq(from, to, by, length.out = NULL, along.with = NULL, ...)`
+
+-   from = startdatum in een datumformaat (verplicht)
+-   to = einddatum in een datumformaat (optioneel)
+-   by = verhoging (optioneel)
+    -   getal = aantal dagen
+    -   "week", "month", "quarter", "year" (optioneel vooraf gegaan door een pos/neg integer)
+    -   object van class `difftime`
+-   length.out = aantal (optioneel)
+
+Voor het specificeren van het datumformaat kun je gebruik maken van een van de drie in R ingebouwde datum/tijd classes: Date, POSIXct en POSIXlt
+
+-   Date - alleen te gebruiken voor datums en geen tijden.
+-   POSIXct - beste keuze wanneer er ook een tijd in de data zit
+
+Verder kun je het datumformaat ook met functies uit package `lubridate()` specificeren. Dit pakket is een wrapper voor POSIXct met een meer intuïtieve syntax.
+
+```{r}
+# eerste dagen van een aantal jaren
+seq(from = as.Date("2010-1-1"), to = as.Date("2021-1-1"), by = "years")
+# eerste dagen van de maanden van een jaar
+seq(from = as.Date("2010-1-1"), by = "month", length.out = 12)
+# eerste dagen van de kwartalen
+seq(from = as.Date("2010-1-1"), to = as.Date("2012-1-1"), by = "quarter")
+# Via lubridate
+seq(from = ymd("2021-8-1"), to = ymd("2021-8-31"), by = "day")
+```
+
+In een tibble / dataframe:
+
+```{r}
+x <- tibble(seq(from = ymd("2021-01-01"), to = ymd("2021-06-30"), by = "week"))
+# rij groepering
+y <- x %>% rowwise()
+```
+
+Voor het genereren van willekeurige datums kun je dit combineren met `sample()`
+
+```{r}
+sample(seq(from = ymd("2021-8-1"), to = ymd("2021-8-31"), by = "day"),
+       size = 5, replace = FALSE)
+```
+
+### Tijden
+
+Bij het genereren van tijden kun je de datum met tijd definieren via `as.POSIXct()` en kun "sec", "min", "hour" met het `by` argument specificeren.
+
+```{r}
+seq(from = as.POSIXct("2021-12-5 14:00"), to = as.POSIXct("2021-12-5 14:15"), by = "min")
+```
+
+En met een tijdzone
+
+```{r}
+seq(from = as.POSIXct("2021-12-5 14:00", tz= "GMT"), to = as.POSIXct("2021-12-5 15:00", , tz= "GMT"), by = "min")
+```

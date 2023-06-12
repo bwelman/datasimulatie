@@ -1,0 +1,430 @@
+# Afhankelijke data {#sec-data-afhankelijk}
+
+{{< include _setup.qmd >}}
+
+Wanneer je in het onderwijs een bepaalde statistische modellen en methodes wilt uitleggen heb je daarvoor vaak data nodig waarin de te behandelen problematiek naar voren komt. Meestal heb je dan te maken met enige afhankelijkheid tussen de variabelen. Jouw "verhaal" moet dan in de data verstopt zitten.
+
+In @sec-variabelen heb je kunnen zien hoe je data voor onafhankelijke variabelen kunt simuleren. In dit hoofdstuk wordt gekeken naar hoe je de gewenste afhankelijkheid tussen variabelen kunt creëren.
+
+## Afhankelijkheid door regels
+
+### Verschillende verdelingen
+
+Afhankelijk van de waarde voor de ene variabele kun je een andere verdeling voor de andere variabele kiezen. Als voorbeeld een dataset met de variabelen `geslacht` (man/vrouw) en de variabele `lengte` (in hele cm).
+
+-   550 vrouwen met lengte = N(165, 5)
+-   450 mannen met lengte = N(170, 20)
+
+Dit is een voorbeeld van twee groepen met verschil in gemiddelde en verschil in standaarddeviatie.
+
+```{r}
+set.seed(42)
+mydata <- tibble(geslacht = c(rep("vrouw", times = 550), rep("man", times = 450)),
+                 lengte = c(round(rnorm(n = 550, mean = 165, sd = 5),1), 
+                            round(rnorm(n = 450, mean = 170, sd = 20),1)))
+```
+
+Het verschil kun je goed controleren via een boxplot.
+
+```{r}
+ggplot(data = mydata, aes(x = geslacht, y = lengte)) +geom_boxplot()
+```
+
+### ifelse()
+
+Met de functie `ifelse()` uit package `dplyr` kun je een nieuwe variabele maken die afhankelijk is van een andere variabele. Stel je wilt voor een verzameling van 1000 personen de variabebelen `leeftijd` en `status` (gehuwd / ongehuwd) simuleren, met de volgende eisen:
+
+-   Ongeveer de helft van de personen is gehuwd.
+-   Voor de leeftijd geldt iedereen 18 jaar of ouder is en dat de gehuwd personen gemiddeld iets ouder zijn dan de ongehuwde personen. Respectievelijk een gemiddelde leeftijd van 40 en 30 jaar.
+
+Allereerst wordt voor 1000 personen de waarden voor de variabele `status` gesimuleerd. Omdat de kans op "gehuwd" en "ongehuwd" even groot is, moet dus ongeveer de helft gehuwd zijn. Je kunt dit controleren via de tabel.
+
+```{r}
+aantal <- 1000
+mydata <- tibble(id = 1:aantal, 
+                 status = sample(c("gehuwd", "ongehuwd"), size = aantal, replace = TRUE))
+table(mydata$status)
+```
+
+De leeftijd voor gehuwden wordt getrokken uit N(40, 10) en voor ongehuwden uit N30, 12). En voor een ondergrens van wordt gezorgd met `pmax()`.
+
+```{r}
+mydata <- mydata %>% 
+  mutate(
+    leeftijd = ifelse(status == "gehuwd", 
+                      rnorm(n = aantal, mean = 40, sd = 10), 
+                      rnorm(n = aantal, mean = 30, sd = 12)) %>% 
+      pmax(18) %>% 
+      round()
+    )
+head(mydata, 8)
+```
+
+Of er verschil in leeftijd is kun je bijvoorbeeld zichtbaar maken met een boxplot.
+
+```{r}
+ggplot(data = mydata, aes(x = status, y = leeftijd)) + geom_boxplot()
+```
+
+Hoeveel personen van 18 jaar zijn er gehuwd?
+
+```{r}
+mydata %>% filter(status == "gehuwd" & leeftijd == 18) %>% nrow()
+```
+
+Als je de verdeling van de status onder de 18-jarigen wilt weten, dan kan dat met
+
+```{r}
+mydata %>% filter(leeftijd == 18) %>% count(status)
+```
+
+### case_when()
+
+Wanneer je meer dan twee opties hebt kun je de functie `case_when()` uit package `dplyr` gebruiken. In het volgende voorbeeld wordt het banksaldo voor drie verschillende beroepen gesimuleerd. De grootte van het banksaldo is afhankelijk van het beroep en is verder positief en niet nul.
+
+Allereerst wordt voor 1000 personen de beroepen gesimuleerd volgens een bepaalde kansverdeling.
+
+```{r}
+aantal = 1000
+mydata <- tibble(id = 1:aantal, 
+                 beroep = sample(c("arts", "leraar", "politieagent"), size = aantal, replace = TRUE, prob = c(2,5,3))
+                 )
+table(mydata$beroep)
+```
+
+En vervolgens simulatie van het banksaldo, afhankelijk van het beroep.
+
+```{r}
+mydata <- mydata %>% 
+  mutate(banksaldo = case_when(
+    beroep == "arts" ~ 200 + rexp(aantal, rate = 0.001),
+    beroep == "leraar" ~ 200 + rexp(aantal, rate = 0.005),
+    TRUE ~ 100 + rexp(aantal, rate = 0.01)) # dit is case else
+    %>% round()
+         )
+```
+
+De verdeling van de banksaldi wordt inzichtelijk gemaakt met een boxplot.
+
+```{r}
+mydata %>% ggplot(aes(x = beroep, y = banksaldo)) + geom_boxplot()
+```
+
+## Afhankelijkheid door correlatie
+
+Er zijn aantal packages welke mogelijkheden bieden om gecorreleerde variabelen te maken. Om meer begrip voor de materie te krijgen wordt begonnen met de Cholesky decompositie waarbij je zelf de nodige bewerkingen moet uitvoeren. Daarna komen de meer geautomatiseerde functies uit speciale packages aan bod.
+
+### Met Cholevsky decompositie
+
+Met behulp van een Cholevsky decompositie is het mogelijk om gecorreleerde random variabelen te maken uit gesimuleerde ongecorreleerde variabelen. Het komt op het volgende neer.
+
+Uitgaande van $v$ variabelen $x_1, x_2, x_3, ..., x_v$ specificeer je een correlatiematrix $C[v, v]$. Op de hoofddiagonaal zijn de waarden gelijk aan 1. De andere waarden zijn de onderlinge correlatiecoëfficiënten, liggend tussen 0 en 1.
+
+Voor elke variabele worden er $w$ waarnemingen gesimuleerd. Deze zijn ongecorreleerd en worden verzameld in een matrix $X$. Hieruit moet dan een matrix $Y$ gemaakt worden met gecorreleerde waarden. Dit gaat in twee stappen:
+
+1.  Bepaal de Cholesky factor $L$ via decompositie van $C$. Dus $LL^T = C$
+2.  Voer een matrixvermenigvuldiging $LX$ uit. Dus $Y = LX$
+
+::: callout-caution
+Omdat er een matrixvermenigvuldiging van $L$ met $X$ uitgevoerd gaat worden moet $X$ een $v \times w$ matrix zijn! Dus elke rij van $X$ bevat alle waarnemingen van één variabele.
+:::
+
+**Cholesky factor L**
+
+Voor een klein aantal variabelen kun je deze nog wel handmatig uitrekenen. Zo is voor twee variabelen met een correlatiecoëfficiënt $r$ de correlatiematrix:
+
+$C = \begin{bmatrix}1 & r \\ r & 1\end{bmatrix}$
+
+Je kunt gemakkelijk afleiden dat dan de Cholesky factor gelijk is aan:
+
+$L = \begin{bmatrix}1 & 0 \\ r & \sqrt{1 - r^2}\end{bmatrix}$
+
+Handiger is het om van R functies gebruik te maken. Met functie `chol()` krijg je de bovendriehoeksmatrix $L^T$. Door deze te transponeren met functie `t()` krijg je $L$.
+
+**Voorbeeld met 3 variabelen**
+
+Ik heb ervaren dat deze methode niet voor alle verdelingen goed werkt, met name wanneer deze flink verschillen in de parameters. Vandaar dat in dit voorbeeld met drie gelijksoortige verdelingen gewerkt wordt.
+
+```{r}
+( C = matrix(data = c(1, .8, .2, .8, 1, .5, .2, .5, 1), 
+             nrow = 3, byrow = TRUE) ) # correlatiematrix
+L = t(chol(C))
+
+w = 1000      # aantal waarnemingen
+set.seed(49)
+x1 <- rnorm(w, mean = 0, sd = 1)
+x2 <- rnorm(w, mean = 0, sd = 1)
+x3 <- rnorm(w, mean = 0, sd = 1)
+
+X <- rbind(x1,x2,x3)
+Y = t(L %*% X)
+round(cor(Y), 4)
+```
+
+Wanneer het aantal waarnemingen klein is zullen de verkregen correlatiecoëfficiënten sterker afwijken van de gespecificeerde.
+
+::: callout-note
+Niet alle correlaties, met name bij drie of meer variabelen, zijn mogelijk. Je krijgt dan foutmeldingen, ook bij de packages hierna. Met name wanneer een matrix niet positief definitief is. Package faux heeft hiervoor een test.
+:::
+
+### mvrnorm()
+
+In package MASS zit functie `mvrnorm()` waarmee je snel en gemakkelijk meerdere normaal verdeelde variabelen tegelijk kunt genereren. De correlatie wordt gespecificeerd door een covariantiematrix.
+
+::: callout-note
+Een covariantiematrix is een vierkante matrix die de covariantie tussen meerdere variabelen samenvat. In het bijzonder vertegenwoordigt elk element in de matrix de covariantie tussen twee variabelen. De diagonale elementen van de matrix vertegenwoordigen de variantie van elke variabele. De covariantiematrix is symmetrisch omdat de covariantie tussen $x$ en $y$ gelijk is aan de covariantie tussen $y$ en $x$.
+
+Covariantie is een maat voor de mate waarin twee variabelen samen variëren. Als twee variabelen een positieve covariantie hebben, hebben ze de neiging samen toe of af te nemen. Als ze een negatieve covariantie hebben, hebben ze de neiging om in tegengestelde richtingen te bewegen. Als hun covariantie nul is, zijn ze niet gecorreleerd, wat betekent dat er geen relatie tussen is.
+:::
+
+Syntax: `mvrnorm(n = 1, mu, Sigma, tol = 1e-6, empirical = FALSE, EISPACK = FALSE)` met
+
+-   `n` - het aantal waarnemingen.
+-   `mu` - een vector met de gemiddeldes van de variabelen.
+-   `Sigma` - een positief symmetrische covariantiematrix.
+-   `tol` - tolerantie (ten opzichte van de grootste variantie) voor numeriek gebrek aan positieve bepaaldheid in Sigma.
+-   `empirical` - logisch. Indien TRUE, `mu` en `Sigma` specificeren de empirische niet populatiegemiddelde en covariantiematrix.
+-   `EISPACK` - logisch. Andere waarden dan `FALSE` zijn een fout
+
+Voor twee variabelen $x$ en $y$ heeft de covariantiematrix de volgende vorm:
+
+$cov matrix = \begin{bmatrix}var(x) & cov(x,y) \\ cov(x,y) & var(y)\end{bmatrix}$
+
+De correlatiecoëfficient $r$ is gedefinieerd als
+
+$r(x,y) = \frac{cov(x,y)}{\sigma(x) \cdot \sigma(y)}$
+
+Met de correlatiecoëfficient kun je dan de covariantie dan berekenen met
+
+$cov(x,y) = r(x,y) \cdot \sigma(x) \cdot \sigma(y)$
+
+Wanneer de varianties (of standaarddeviaties) van de twee variabelen bekend zijn, alsmede de gewenste correlatiecoëfficient kun je de covariantiematrix in R specificeren met
+
+`covmatrix <- matrix(c(var(x), cov(x,y), cov(x,y), var(y), nrow=2)`
+
+#### Voorbeeld 2 variabelen {.unnumbered}
+
+Genereer een dataset met een correlatie van 0,8 tussen twee variabelen met de volgende kenmerken.
+
+-  $\text{variabele 1} \in \mathbb{N}(6, 0.2)$
+-  $\text{variabele 2} \in \mathbb{N}(7, 0.3)$  
+
+```{r}
+set.seed(123)        # voor reproduceerbaarheid
+n <- 1000            # aantal waarnemingen
+mu <- c(6, 7)        # gemiddeldes
+sd <- c(0.2, 0.3)    # standaarddeviaties
+r <- 0.8             # correlatiecoefficient
+
+var <- sd^2          # varianties
+cov <- r*sd[1]*sd[2] # covariantie
+
+# covariantiematrix
+covmatrix <- matrix(c(var[1], cov, cov, var[2]), nrow = 2)
+mydata <- MASS::mvrnorm(n=n, mu=mu, Sigma=covmatrix)
+
+plot(mydata[,1], mydata[,2], main = "Gecorreleerde data", 
+     xlab = "Variabele 1", ylab = "Variabele 2")
+
+cor(mydata[,1], mydata[,2])
+```
+
+#### Voorbeeld 3 variabelen {.unnumbered}
+
+Voor meer variabelen wordt het snel wat gecompliceerder, maar het principe blijft hetzelfde. Nu voor drie variabelen $x$, $y$ en $z$ met de volgende kenmerken:
+
+|           | $x$  | $y$  | $z$  |
+|-----------|------|------|------|
+| gemiddelde| 6    | 7    | 5    |
+| sd        | 4    | 5    | 3    |
+| var       | 16   | 25   | 9    |
+
+De gewenste correlatiecoëfficienten zijn:
+
+$r(x,y) = 0.2$, $r(x,z) = 0.4$ en $r(y,z) = 0.6$
+
+Berekeningen van de covarianties:
+
+-   $cov(x,y) = r(x,y)*\sigma(x)*\sigma(y) = 0.2*4*5 = 4$
+-   $cov(x,z) = r(x,z)*\sigma(x)*\sigma(z) = 0.4*4*3 = 4.8$
+-   $cov(y,z) = r(y,z)*\sigma(y)*\sigma(z) = 0.6*5*3 = 9$
+
+De covariantiematrix heeft dan de volgende inhoud
+
+|     | $x$              | $y$            | $z$              |
+|:---:|:----------------:|:--------------:|:----------------:|
+| $x$ | $var(x) = 16$    | $cov(x,y) = 4$ | $cov(x,z) = 4.8$ |
+| $y$ | $cov(x,y) = 4$   | $var(y) = 25$  | $cov(y,z) = 9$   |
+| $z$ | $cov(x,z) = 4.8$ | $var(y,z) = 9$ | $cov(y,z) = 9$   |
+
+```{r}
+set.seed(123)
+n <- 500
+mu <- c(6, 7, 5)
+covmatrix <- matrix(data = c(16, 4, 4.8, 4, 25, 9, 4.8, 9, 9), nrow = 3, byrow = TRUE)
+mydata <- MASS::mvrnorm(n = n, mu = mu, Sigma = covmatrix)
+
+cor(mydata)
+```
+
+### faux
+
+Goed te gebruiken package met veel mogelijkheden. [Zie verder](https://debruine.github.io/faux/articles/rnorm_multi.html)
+
+Met de functie `rnorm_multi()` kun je meerdere normaal verdeelde gecorreleerde variabelen tegelijk genereren. De werking lijkt veel op mvrnorm uit package MASS, waar volgens mij ook een deel van de functionaliteit vandaan komt.
+
+Syntax: `rnorm_multi(n = 100, vars = NULL, mu = 0, sd = 1, r = 0, varnames = NULL, empirical = FALSE, as.matrix = FALSE)`
+
+-   `n` - aantal waarnemingen.
+-   `vars` - aantal te retourneren variabelen.
+-   `mu` - vector met de gemiddelden van de variabelen (lengte is 1 of gelijk aan `vars`).
+-   `sd` - vector met de standaarddeviaties van de variabelen (lengte is 1 of gelijk aan `vars`).
+-   `r` - correlaties tussen de variabelen.
+    -   getal voor alle paren
+    -   vars\*vars matrix
+    -   vars\*vars vector
+    -   vars\*(vars-1)/2 vector
+-   `varnames` - optionele namen voor de variabelen (stringvector met lengte `vars`), standaardwaarden als r een matrix is met kolomnamen.
+-   `empirical` - logische waarde. Bij TRUE specificeren mu, sd en r de emopirische waarden en niet die van de populatie.
+-   `as.matrix` - logische waarde. Bij TRUE wordt een matrix gereourneerd, anders een data frame.
+
+Het resultaat is een data frame van `vars` vectoren.
+
+#### 1 getal voor correlatie
+
+Als je wilt dat alle paren dezelfde correlatie hebben, geef je gewoon een enkel getal op.
+
+```{r}
+library(faux)
+dat <- rnorm_multi(n=50, vars=5, mu=0, sd=1 , r=0.3, varnames=letters[1:5])
+get_params(dat)
+```
+
+```{r}
+dat <- rnorm_multi(n=50, vars=3, mu=c(10, 20, 30), sd=c(1,2,3) , r=0.3, varnames = LETTERS[1:3])
+get_params(dat)
+```
+
+In het volgende voorbeeld worden leeftijden gegenereerd en een bijbehorend banksaldo met een correlatiecoefficient van 0.6.
+
+```{r}
+set.seed(49)
+dat <- faux::rnorm_multi(n = 30, 
+                         mu = c(35, 2000), 
+                         sd = c(10, 500), 
+                         r = 0.6, 
+                         varnames = c("leeftijd", "banksaldo"), 
+                         empirical = FALSE)
+
+dat <- dat %>%
+  mutate(leeftijd = round(leeftijd, 0), banksaldo = round(banksaldo, 0))
+get_params(dat)
+```
+
+#### vector voor correlaties
+
+Bij het volgende voorbeeld worden waarden voor drie variabelen gesimuleerd met een correlatie van 0.9 tussen x1 en x2, 0.5 tussen x1 en x3, 0.1 tussen x2 en x3.
+
+```{r}
+set.seed(1234)
+dat <- rnorm_multi(n = 100, vars=3,
+                   mu = c(20, 35, 50),
+                   sd = c(2, 5, 7),
+                   r = c(0.9, 0.5, 0.1),
+                   varnames = c("x1", "x2", "x3"),
+                   empirical = TRUE)
+get_params(dat)
+```
+
+#### matrix voor correlaties
+
+Als je al een correlatiematrix hebt, zoals de uitvoer van `cor()`, kun je daarmee de correlaties voor de gesimuleerde gegevens specificeren.
+
+```{r}
+cmat <- cor(iris[,1:4])
+dat <- rnorm_multi(n=100, vars=4, mu=0, sd=1, r=cmat, varnames = colnames(cmat))
+get_params(dat)
+```
+
+#### vars\*vars vector
+
+Je kunt de correlatiematrix handmatig specificeren als een vars\*vars-lengtevector, die de correlaties van 1 over de diagonaal omvat.
+
+```{r}
+cmat <- c(1, .3, .5,
+          .3, 1, 0,
+          .5, 0, 1)
+dat <- rnorm_multi(n=100, vars=3, mu=0, sd=1, r=cmat, 
+                  varnames = letters[24:26])
+get_params(dat)
+```
+
+#### Reeds bestaande variabelen
+
+Met de functie `rnorm_pre()` kun je een vector maken met een gespecificeerde correlatie met een of meerdere reeds bestaande variabelen.
+
+Syntax: `rnorm_pre(x, mu = 0, sd = 1, r = 0, empirical = FALSE)`
+
+-   `x` - de bestaande vector of gegevenstabel van alle vectoren.
+-   `mu` - gewenste gemiddelde van geretourneerde vector
+-   `sd`- gewenste standaarddeviatie van geretourneerde vector
+-   `r` - gewenste correlatie(s) tussen bestaande en geretourneerde vectoren
+
+```{r}
+x <- rnorm(n=20, mean = 10, sd=1)
+y <- rnorm_pre(x, mu=50, sd=2, r=0.8)
+cor(x,y)
+```
+
+```{r}
+set.seed(49)
+dat <- rnorm_multi(n=40, vars=2, mu=c(10,40), sd=c(1,4), r=0.5, varnames = c("x", "y"), empirical = TRUE)
+get_params(dat)
+dat$z <- rnorm_pre(dat, mu=30, sd=3, r=c(0.75, 0.25))
+get_params(dat)
+```
+
+Een variant hierop
+
+```{r}
+set.seed(49)
+dat <- rnorm_multi(n=40, vars=2, mu=c(10,40), sd=c(1,4), r=0.5, varnames = c("x", "y"), empirical = TRUE)
+dat <- dat %>%
+  mutate(z = rnorm_pre(dat, mu=30, sd=3, r=c(0.75, 0.25), empirical= TRUE))
+get_params(dat)
+```
+
+<!-- openxlsx::write.xlsx(dat, "S:/test.xlsx", asTable=FALSE, sheetName="data") -->
+
+### simstudy
+
+Met functie `gencorData()` kun je gecorreleerde data uit normale verdelingen maken. Ik vind dit zelf wel het meest handige.
+
+```{r}
+library(simstudy)
+cormat <- genCorMat(3, cors = c(0.25, 0.4, 0.6)) # definieer correlatiematrix
+cormat
+
+mydata <- genCorData(n = 500, mu = c(6, 7, 5), sigma = c(4,5,3), 
+                     corMatrix = cormat, cnames = c("x", "y", "z"))
+head(mydata)
+
+# controleer correlatiecoefficienten van de gegenereerde data
+round(cor(as.matrix(mydata[, -1])), 2)
+```
+
+Wil je een verdeling specificeren dan moet je functie `gencorGen()` (één soort verdeling) of `genCorFlex()` (verschillende soorten verdelingen) gebruiken. 
+
+Voorgaand voorbeeld hiermee wordt dan
+
+```{r}
+mydata2 <- genCorGen(n = 500, nvars = 3, 
+                     corMatrix = cormat,      # correlatiematrix
+                     params1 = c(6, 7, 5),    # gemiddeldes
+                     params2 = c(16, 25, 9),  # varianties
+                     dist = "normal", 
+                     wide = TRUE, cnames = c("x", "y", "z"))
+head(mydata2)
+# controleer correlatiecoefficienten van de gegenereerde data
+round(cor(as.matrix(mydata2[, -1])), 2)
+```

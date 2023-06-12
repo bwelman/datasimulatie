@@ -1,0 +1,12 @@
+
+```{r setup, include=FALSE}
+#| label: setup
+#| include: false
+#| warning: false
+#| message: false
+
+library(tidyverse)
+library(swrtools)
+library(lubridate) # handig bij gebruik datums
+theme_set(theme_bw())
+```
