@@ -44,3 +44,8 @@ SimDesign
 simstudy
 : Package ontwikkeld door Keith Goldfeld met als doel om op een gemakkelijke manier data te kunnen genereren voor simulaties en onderwijs.
 : [simstudy](https://kgoldfeld.github.io/simstudy/index.html)
+
+datasetR
+: Package voor het genereren van random datasets. Moet nog bekeken worden
+: [artikel](https://tomaztsql.wordpress.com/2023/07/13/datasetr-r-package-for-creating-datasets/)
+: [GitHub](https://github.com/tomaztk/datasetR)
