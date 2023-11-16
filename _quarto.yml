@@ -26,7 +26,9 @@ format:
     theme: cosmo
     fig-width: 6
     fig-asp: 0.618
-    code-fold: false
+    code-fold: true
+    code-summary: "Toon code"
+    code-tools: true
     link-external-newwindow: true
     callout-appearance: simple
 

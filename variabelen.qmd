@@ -6,9 +6,11 @@
 
 Categorievariabelen dienen vaak als een soort groeperings- of behandelingsvariabele, met meerdere individuen/observaties per groep/behandeling. Dit betekent dat je herhalingen van elke categorie moet hebben. Dat kan met de functie `rep()`.
 
-    rep(x, times)      # herhaalt hele vector het gewenste aantal keren
-    rep(x, length.out) # herhaalt hele vector tot gewenste lengte
-    rep(x, each)       # herhaalt elk element van de vector
+```         
+rep(x, times)      # herhaalt hele vector het gewenste aantal keren
+rep(x, length.out) # herhaalt hele vector tot gewenste lengte
+rep(x, each)       # herhaalt elk element van de vector
+```
 
 ### Letters alfabet
 
@@ -75,6 +77,15 @@ sprintf("H%s", 1:9)
 paste("H", 1:9, sep="")
 ```
 
+
+Een andere nuttige functie voor strings is `strrep(x, times)` waarmee je strings meerdere keren kunt herhalen:
+
+```{r}
+strrep("abc", 10)
+strrep(c("abc", "def"), c(3,2))
+strrep(c("X", "Y", "Z"), 1:3)
+```
+
 ### Persoonsnamen
 
 Vaak gebruik ik voor namen de bekende kleurtjes:
@@ -93,15 +104,15 @@ Voor het genereren van een regelmatig patroon van factor levels kun je de functi
 
 `gl(n, k, length = n*k, labels = seq_len(n), ordered = FALSE)`
 
-+ `n` : een geheel getal voor het aantal levels.
+-   `n` : een geheel getal voor het aantal levels.
 
-+ `k`	: een geheel voor het aantal herhalingen van elke level.
+-   `k` : een geheel voor het aantal herhalingen van elke level.
 
-+ `length` : een geheel getal voor het totaal aantal te genereren levels.
+-   `length` : een geheel getal voor het totaal aantal te genereren levels.
 
-+ `labels` : een optionele vector met labels voor de factor levels.
+-   `labels` : een optionele vector met labels voor de factor levels.
 
-+ `ordered`	: een logische waarde om aan te geven of het resultaat geordend moet zijn.
+-   `ordered` : een logische waarde om aan te geven of het resultaat geordend moet zijn.
 
 ```{r}
 gl(n=3, k=2, length=7, labels = c("Enschede", "Hengelo", "Almelo"))
