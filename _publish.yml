@@ -1,0 +1,4 @@
+- source: project
+  quarto-pub:
+    - id: 2b49e4b5-335f-43ec-8bce-62067b525059
+      url: 'https://benwem.quarto.pub/datasimulatie-met-r'
