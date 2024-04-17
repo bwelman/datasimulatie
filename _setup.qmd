@@ -6,7 +6,6 @@
 #| message: false
 
 library(tidyverse)
-library(swrtools)
-library(lubridate) # handig bij gebruik datums
+library(softwijzer)
 theme_set(theme_bw())
 ```

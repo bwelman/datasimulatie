@@ -2,65 +2,6 @@
 
 {{< include _setup.qmd >}}
 
-## Kwartieldata
-
-Genereer aselecte getallen met gegeven waarden voor de kwartielen Q0 (minimum), Q1, Q2 (mediaan), Q3 en Q4 (maximum).
-
-Bron: <https://stats.stackexchange.com/questions/343534/is-there-any-easy-way-to-generate-random-numbers-with-a-certain-median-and-1st-a>
-
-Dit wordt gedaan door de vereiste aantallen willekeurige waarden in elk van de vier kwartielen te genereren, waarbij elk kwartiel wordt afgebakend door de gespecificeerde waarden.
-
-$k$ is een niet-negatief geheel getal. Het aantal gegenereerde getallen wordt dan $n = 4k + 3$.
-
-$Q_0 = X_1$, $Q_1 = X_{k+1}$, $Q_2 = X_{2k+2}$, $Q_3 = X_{3k+3}$ en $Q_4 = X_{4k+3}$
-
-
-```{r}
-testdata <- function(k, q0, q1, q2, q3, q4){
-	x <- as.integer(round( c(runif(k, min = q0, max = q1),
-							 runif(k, min = q1, max = q2),
-							 runif(k, min = q2, max = q3),
-							 runif(k, min = q3, max = q4),
-							 q1, q2, q3)))
-	return(x)
-}
-```
-
-Je kunt waarden voor 1 variabele genereren
-
-```{r}
-groep1 = testdata(k =10, q0 = 45, q1 = 52, q2 = 54, q3 = 57, q4 = 61)
-table(groep1)
-hist(groep1)
-boxplot(groep1)
-```
-
-```{r}
-ggplot() + 
-	geom_boxplot(aes(y = groep1)) + 
-	scale_x_discrete()
-```
-
-Wanneer je een dataframe wilt maken met twee groepen (kolommen), dan moeten de aantallen gelijk zijn.
-
-```{r}
-groep2 = testdata(k =10, q0 = 38, q1 = 43, q2 = 47, q3 = 50, q4 = 58)
-mydf <- data.frame(groep1, groep2)
-boxplot(mydf)
-```
-
-Heb je verschillende aantallen dan kun je deze in een list stoppen.
-
-```{r}
-groep3 <- testdata(k = 9, q0 = 38, q1 = 43, q2 = 47, q3 = 50, q4 = 58)
-mylist <- list(groep1 = groep1, groep3 = groep3)
-boxplot(mylist)
-```
-
-```{r eval=FALSE}
-write.csv2(mydf, file = "studietijd.csv", , row.names = FALSE )
-```
-
 ## Muntstuk
 
 De kans op kop of munt is $0.5$. Je kunt 15 worpen simuleren met bijv.
@@ -83,8 +24,7 @@ table(worpen)
 
 ## Dobbelsteen
 
-De kans op een van de uitkomsten [1,6] is 1/6.
-Simuleer 50 worpen met de dobbelsteen
+De kans op een van de uitkomsten \[1,6\] is 1/6. Simuleer 50 worpen met de dobbelsteen
 
 ```{r}
 worpen <- sample(1:6, size = 50, replace = TRUE)
@@ -136,7 +76,7 @@ Deze verdeling is meer symmetrisch.
 
 ## Personen genereren
 
-Inspiratiebron: Functie create_data_... uit package [explore](https://rolkra.github.io/explore/index.html).
+Inspiratiebron: Functie create_data\_... uit package [explore](https://rolkra.github.io/explore/index.html).
 
 Een voorbeeld van een functie om een aantal personen met bepaalde kenmerken te genereren.
 
@@ -180,4 +120,3 @@ Hierbij is
 ```{r}
 mijnpersonen <- personen(aantal = 100)
 ```
-

@@ -50,7 +50,7 @@ Ook hierop kun je de functie `rep()` toepassen.
 rep(month.abb[1:3], 4)
 ```
 
-Ik heb Nederlandstalige definities voor de maandnamen gemaakt en opgenomen in de eigen package `swrtools`
+Ik heb Nederlandstalige definities voor de maandnamen gemaakt en opgenomen in de eigen package `softwijzer`
 
 ```{r}
 month.abb.nl
@@ -88,14 +88,21 @@ strrep(c("X", "Y", "Z"), 1:3)
 
 ### Persoonsnamen
 
-Vaak gebruik ik voor namen de bekende kleurtjes:
+Vaak gebruik ik voor persoonsnamen de dataset `people` uit package `softwijzer`:
 
 ```{r}
-KleurPersonen <- data.frame(
-	Naam = c("An Azuur", "Berend Blauw", "Chris Cyaan", "Gerrit Groen", "Ivo Indigo", "Mari Magenta", "Otto Oranje", "Peter Paars", "Roger Rood", "Stan Sepia", "Trudy Turkoois", "Vicky Violet", "Willem Wit", "Zorro Zwart"), 
-	Sexe = c("v", "m", "m", "m", "m", "v","m", "m", "m", "m", "v", "v", "m", "m")
-	)
+KleurPersonen <- softwijzer::people
 knitr::kable(KleurPersonen)
+```
+
+verder bevat package softwijzer ook de datasets `boys` en `girls` met respectievelijk 200 Nederlandstalige jongensnamen en 200 meisjesnamen.
+
+```{r}
+# Jongensnamen
+head(boys, 8)
+
+# meisjesnamen
+tail(girls, 8)
 ```
 
 ### Factor levels
@@ -484,4 +491,68 @@ En met een tijdzone
 
 ```{r}
 seq(from = as.POSIXct("2021-12-5 14:00", tz= "GMT"), to = as.POSIXct("2021-12-5 15:00", , tz= "GMT"), by = "min")
+```
+
+## Percentieldata
+
+Inspiratiebron: [Simulated Data With R, Michael Minn](https://michaelminn.net/tutorials/r-simulating-data/)
+
+Soms worden statistische gegevens weergegeven als percentielen. Bijvoorbeeld de lengte (in cm) van een groep personen:
+
+```{r}
+#| echo: false
+mydf <- data.frame(percentiel = c(5, 10, 15, 25, 50, 75, 85, 90, 95),
+                   lengte = c(163.3, 166.1, 167.9, 170.7, 175.5, 180.8, 183.6, 185.4, 188.2))
+knitr::kable(mydf)
+```
+
+Door een spline te gebruiken, is het mogelijk om een curve te simuleren die past bij die percentielpunten en vervolgens de functie `predict()` te gebruiken om een representatieve steekproef te maken.
+
+```{r}
+percentiel = c(5, 10, 15, 25, 50, 75, 85, 90, 95)
+plengte = c(163.3, 166.1, 167.9, 170.7, 175.5, 180.8, 183.6, 185.4, 188.2)
+
+# Maak een spline die op deze punten past
+spline <- smooth.spline(x = percentiel, y = plengte)
+
+# Simuleer een aantal waarden die het bereik van de percentielen dekken
+n = 1000
+lengtes <- predict(spline, 100 * (1:n)/(n+1))
+
+# Plot van de gesimuleerde data
+plot(percentiel, plengte, col = "blue", pch = 16)
+lines(lengtes$x, lengtes$y)
+
+# Histogram en boxplot
+hist(lengtes$y)
+boxplot(lengtes$y)
+
+# Samenvattingen
+summary(lengtes$y)
+fivenum(lengtes$y)
+```
+
+### Kwartieldata
+
+Genereer aselecte getallen met gegeven waarden voor de kwartielen Q0 (minimum), Q1, Q2 (mediaan), Q3 en Q4 (maximum).
+
+Het genereren van de data gaat eenvoudig met de hiervoor geschetste methode voor percentieldata.
+
+```{r}
+percentiel <- c(0, 25, 50, 75, 100)
+pscore <- c(45, 52, 54, 57, 61)
+
+spline <- smooth.spline(percentiel, pscore)
+# simuleer 100 data
+n <- 100
+scores <- predict(spline, 100 * (1:n) / (n+1))
+
+mydata <- round(scores$y, 0)
+
+hist(mydata)
+boxplot(mydata)
+
+summary(mydata)
+fivenum(mydata)
+
 ```
