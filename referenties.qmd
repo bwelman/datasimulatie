@@ -6,7 +6,7 @@
 -   [Generating/Simulating data, Clay Ford](https://clayford.github.io/dwir/dwr_12_generating_data.html)
 -   [Simulation, Hadley Wickham](http://had.co.nz/stat480/lectures/15-simulation.pdf)
 -   [Elements of Applied Biostatistics, Chapter 7](https://www.middleprofessor.com/files/applied-biostatistics_bookdown/_book/creating-fake-data.html)
--   Richard Vogg: [blog](https://r-vogg-blog.netlify.app/) en [github](https://github.com/richardvogg/r-vogg-blog)
+-   Richard Vogg: [blog](https://r-vogg-blog.netlify.app/composition) en [github](https://github.com/richardvogg/r-vogg-blog)
 -   [Simulating Correlated Data, Thomas Ward](https://thomasward.com/simulating-correlated-data/)
 -   [Introduction to the random Package in R](https://statisticsglobe.com/r-random-package)
 
@@ -30,22 +30,33 @@
 Er zijn verschillende packages die behulpzaam kunnen zijn bij het simuleren van data. Op dit moment zijn voor mijn doeleinden de packages `faux` en `simstudy` bruikbaar.
 
 charlatan
-: Met deze package kun je verschillende soorten fake data maken. Pakket is nog in ontwikkeling en nog niet erg bruikbaar in de praktijk.
-: [rOpenSci: The charlatan package](https://docs.ropensci.org/charlatan/)
+
+:   Met deze package kun je verschillende soorten fake data maken. Pakket is nog in ontwikkeling en nog niet erg bruikbaar in de praktijk.
+
+:   [rOpenSci: The charlatan package](https://docs.ropensci.org/charlatan/)
 
 faux
-: Package van Lisa DeBruine. Heeft vooral functies voor het simuleren van categoriale en numerieke data.
-: [faux](https://debruine.github.io/faux/)
+
+:   Package van Lisa DeBruine. Heeft vooral functies voor het simuleren van categoriale en numerieke data.
+
+:   [faux](https://debruine.github.io/faux/)
 
 SimDesign
-: Genereert data uit modellen of kansdichtheidsfuncties. Moet dit nog beter bestuderen.
-: [Introduction to the SimDesign package](https://cran.r-project.org/web/packages/SimDesign/vignettes/SimDesign-intro.html)
+
+:   Genereert data uit modellen of kansdichtheidsfuncties. Moet dit nog beter bestuderen.
+
+:   [Introduction to the SimDesign package](https://cran.r-project.org/web/packages/SimDesign/vignettes/SimDesign-intro.html)
 
 simstudy
-: Package ontwikkeld door Keith Goldfeld met als doel om op een gemakkelijke manier data te kunnen genereren voor simulaties en onderwijs.
-: [simstudy](https://kgoldfeld.github.io/simstudy/index.html)
+
+:   Package ontwikkeld door Keith Goldfeld met als doel om op een gemakkelijke manier data te kunnen genereren voor simulaties en onderwijs.
+
+:   [simstudy](https://kgoldfeld.github.io/simstudy/index.html)
 
 datasetR
-: Package voor het genereren van random datasets. Moet nog bekeken worden
-: [artikel](https://tomaztsql.wordpress.com/2023/07/13/datasetr-r-package-for-creating-datasets/)
-: [GitHub](https://github.com/tomaztk/datasetR)
+
+:   Package voor het genereren van random datasets. Moet nog bekeken worden
+
+:   [artikel](https://tomaztsql.wordpress.com/2023/07/13/datasetr-r-package-for-creating-datasets/)
+
+:   [GitHub](https://github.com/tomaztk/datasetR)

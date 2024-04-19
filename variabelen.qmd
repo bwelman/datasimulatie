@@ -107,7 +107,7 @@ tail(girls, 8)
 
 ### Factor levels
 
-Voor het genereren van een regelmatig patroon van factor levels kun je de functie `gl()` gebruiken.
+Voor het genereren van een regelmatig patroon van factor levels kun je de functie `gl()` (generate levels) gebruiken.
 
 `gl(n, k, length = n*k, labels = seq_len(n), ordered = FALSE)`
 
@@ -125,6 +125,20 @@ Voor het genereren van een regelmatig patroon van factor levels kun je de functi
 gl(n=3, k=2, length=7, labels = c("Enschede", "Hengelo", "Almelo"))
 gl(n=2, k=5)
 ```
+
+### Random waarden
+
+Genereer een vector met namen, 60% is "Enschede" en 40% is "Hengelo". Voor dichotome waarden kun je de functie `ifelse()` gebruiken en de voorwaarde met de functie `runif()` bepaalt de verhouding van de waarden. Bij een klein aantal komt dit minder overeen.
+
+```{r}
+set.seed(1234)
+stad <- ifelse(runif(n=20) > 0.6, "Hengelo", "Enschede")
+stad
+table(stad)
+```
+
+
+
 
 ## Getallen
 
@@ -164,6 +178,26 @@ rep(1:4, times = c(2,3,1,2)) # deze constructie kan alleen met times
 rep(1:4, each = 2)
 rep(1:4, each = 2, len = 6) # combinatie van argumenten
 rep(1:4, each = 2, times = 3)
+```
+
+#### Transformaties
+
+Reeksen kun je ook transformeren via formules en functies.
+
+```{r}
+#| code-fold: false
+# Exponentieel
+exp(1:5)
+
+# Machten
+2^(0:8)
+
+# Logaritmes
+log(1:5)
+
+# goniometrisch
+cos((1:4)*pi)
+
 ```
 
 ### Verdelingen
@@ -376,6 +410,64 @@ df <- data.frame( id,
 
 ggplot(data = df, aes(x=instrument, y=leeftijd)) + geom_boxplot()
 ```
+
+Nog een voorbeeld
+
+```{r}
+set.seed(123)
+mydf <- people
+aantal <- nrow(mydf)
+mydf$leeftijd <- rnorm(aantal, mean = 40, sd = 15) |>
+  pmax(18) |>pmin(65) |> round()
+mydf$haarkleur <- sample(c("blond", "bruin", "zwart", "rood"), 
+                         size = aantal, replace = TRUE, 
+                         prob = c(4,4,3,2))
+mydf$banksaldo <- rexp(aantal, rate= 2.5e-05) |> round(0)
+mydf
+```
+
+Een wat complexer voorbeeld van een functie om een aantal personen met bepaalde kenmerken te genereren. Inspiratiebron: Functie create_data\_... uit package [explore](https://rolkra.github.io/explore/index.html).
+
+
+```{r}
+# Maak functie
+personen <- function (aantal = 1000, add_id = FALSE, seed = 123) {
+	set.seed(seed)
+  randomset <- stats::runif(aantal)
+	data <- data.frame(leeftijd = sample(16:95, aantal, replace = TRUE),
+					   geslacht = sample(c("Man", "Vrouw", "Onbekend"), prob = c(0.49, 0.49, 0.02), aantal, replace = TRUE),
+					   oogkleur = sample(c("Blauw", "Groen", "Bruin"), size = aantal, replace = TRUE),
+					   schoenmaat = trunc(stats::rnorm(aantal, mean = 43, sd = 3)),
+					   iq = trunc(stats::rnorm(aantal, mean = 100, sd = 20)),
+					   opleiding = sample(c(0:100), aantal, replace = TRUE),
+					   inkomen = sample(c(0:100), aantal, replace = TRUE),
+					   handset = sample(c("Apple", "Android", "Anders"), prob = c(0.4, 0.5, 0.1), aantal, replace = TRUE),
+					   huisdier = sample(c("Hond", "Kat", "Anders", "Geen"), prob = c(0.23, 0.22, 0.11, 0.35), aantal, replace = TRUE),
+					   pizza = sample(c("Margherita", "Prosciutto", "Frute di Mare", "Hawai", "Quattro Stagioni", "Tonno"), aantal, replace = TRUE),
+					   ijsje = sample(c("Vanille", "Chocolade", "Aardbei", "Citroen", "Cookie", "Hazelnoot", "Pistache"), prob = c(0.3, 0.2, 0.2, 0.1, 0.1, 0.05, 0.05), aantal, replace = TRUE),
+					   knoflook = as.integer(sample(0:1, aantal, prob = c(0.4, 0.6), replace = TRUE)),
+					   sushi = as.integer(sample(0:1, aantal, prob = c(0.5, 0.5), replace = TRUE)),
+					   beatles = as.integer(sample(0:1, aantal, prob = c(0.6, 0.4), replace = TRUE)),
+					   bier = as.integer(sample(0:1, aantal, prob = c(0.6, 0.4), replace = TRUE)))
+	data$beatles <- ifelse(data$beatles + data$leeftijd/50 * randomset >= 1, 1L, 0L)
+	data$bier <- ifelse(data$geslacht == "Man" & randomset >= 0.2, 1L, data$bier)
+	data$sushi <- ifelse(data$leeftijd/75 + randomset/4 >= 1, 0L, data$sushi)
+	data$schoenmaat <- ifelse(data$geslacht == "Vrouw" & randomset >= 0.3, data$schoenmaat - 1.8, data$schoenmaat)
+	data$inkomen <- ifelse(data$opleiding > 50 & randomset > 0.3, data$inkomen + data$opleiding/2, data$inkomen)
+	data$handset <- ifelse(data$handset == "Android" & data$inkomen > 75 & data$opleiding < 25, "Apple", data$handset)
+	if (add_id) {
+		data <- data |> add_var_id(name = "id")
+	}
+	as.data.frame(data)
+}
+
+mijnpersonen <- personen(aantal = 25)
+```
+
+Hierbij is
+
+-   huisdier, pizza, ijsje : het favoriete huisdier, favoriete pizza, favoriete ijsje
+-   knoflook, sushi, beatles, bier : houdt van respectievelijk knoflook, sushi, beatles, bier
 
 ### Data zonder verschillen tussen twee groepen
 

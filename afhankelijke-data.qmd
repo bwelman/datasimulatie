@@ -46,7 +46,7 @@ mydata <- tibble(id = 1:aantal,
 table(mydata$status)
 ```
 
-De leeftijd voor gehuwden wordt getrokken uit N(40, 10) en voor ongehuwden uit N30, 12). En voor een ondergrens van wordt gezorgd met `pmax()`.
+De leeftijd voor gehuwden wordt getrokken uit N(40, 10) en voor ongehuwden uit N30, 12), waardoor gehuwden gemiddeld een iets oudere leeftijd hebben dan ongehuwden. En voor een ondergrens van wordt gezorgd met `pmax()`.
 
 ```{r}
 mydata <- mydata %>% 
