@@ -1,62 +1,21 @@
 # Referenties {#sec-referenties}
 
-**Algemeen:**
+## Online sites:
 
--   [Simulated Data with R](http://michaelminn.net/tutorials/r-simulating-data/)
--   [Generating/Simulating data, Clay Ford](https://clayford.github.io/dwir/dwr_12_generating_data.html)
--   [Simulation, Hadley Wickham](http://had.co.nz/stat480/lectures/15-simulation.pdf)
--   [Elements of Applied Biostatistics, Chapter 7](https://www.middleprofessor.com/files/applied-biostatistics_bookdown/_book/creating-fake-data.html)
--   Richard Vogg: [blog](https://r-vogg-blog.netlify.app/composition) en [github](https://github.com/richardvogg/r-vogg-blog)
--   [Simulating Correlated Data, Thomas Ward](https://thomasward.com/simulating-correlated-data/)
--   [Introduction to the random Package in R](https://statisticsglobe.com/r-random-package)
-
-**Ariel Muldoon:**
-
--   [Simulate! Simulate! - Part 1: A linear model, 2018-01-09](https://aosmith.rbind.io/2018/01/09/simulate-simulate-part1/)
--   [Simulate! Simulate! - Part 2: A linear mixed model, 2018-04-23](https://aosmith.rbind.io/2018/04/23/simulate-simulate-part-2/)
--   [A closer look at replicate() and purrr::map() for simulations, 2018-06-05](https://aosmith.rbind.io/2018/06/05/a-closer-look-at-replicate-and-purrr/)
--   [Simulate! Simulate! - Part 3: The Poisson edition, 2018-07-18](https://aosmith.rbind.io/2018/07/18/simulate-poisson-edition/)
--   [Getting started simulating data in R: some helpful functions and how to use them, 2018-08-29](https://aosmith.rbind.io/2018/08/29/getting-started-simulating-data/)
--   [Simulate! Simulate! - Part 4: A binomial generalized linear mixed model, 2020-08-20](https://aosmith.rbind.io/2020/08/20/simulate-binomial-glmm/)
-
-**Online sites:**
-
--   [Fantasy Name Generators, ook Nederlandstalige](https://www.fantasynamegenerators.com/dutch_names.php)
--   [Fake Name Generator, ook Nederlands](https://www.fakenamegenerator.com/)
 -   [Mockaroo](https://www.mockaroo.com/)
 
 ## Packages
 
 Er zijn verschillende packages die behulpzaam kunnen zijn bij het simuleren van data. Op dit moment zijn voor mijn doeleinden de packages `faux` en `simstudy` bruikbaar.
 
-charlatan
+### faux
 
-:   Met deze package kun je verschillende soorten fake data maken. Pakket is nog in ontwikkeling en nog niet erg bruikbaar in de praktijk.
+Package van Lisa DeBruine. Heeft vooral functies voor het simuleren van categoriale en numerieke data.
 
-:   [rOpenSci: The charlatan package](https://docs.ropensci.org/charlatan/)
+[faux](https://debruine.github.io/faux/)
 
-faux
+### simstudy
 
-:   Package van Lisa DeBruine. Heeft vooral functies voor het simuleren van categoriale en numerieke data.
+Package ontwikkeld door Keith Goldfeld met als doel om op een gemakkelijke manier data te kunnen genereren voor simulaties en onderwijs.
 
-:   [faux](https://debruine.github.io/faux/)
-
-SimDesign
-
-:   Genereert data uit modellen of kansdichtheidsfuncties. Moet dit nog beter bestuderen.
-
-:   [Introduction to the SimDesign package](https://cran.r-project.org/web/packages/SimDesign/vignettes/SimDesign-intro.html)
-
-simstudy
-
-:   Package ontwikkeld door Keith Goldfeld met als doel om op een gemakkelijke manier data te kunnen genereren voor simulaties en onderwijs.
-
-:   [simstudy](https://kgoldfeld.github.io/simstudy/index.html)
-
-datasetR
-
-:   Package voor het genereren van random datasets. Moet nog bekeken worden
-
-:   [artikel](https://tomaztsql.wordpress.com/2023/07/13/datasetr-r-package-for-creating-datasets/)
-
-:   [GitHub](https://github.com/tomaztk/datasetR)
+[simstudy](https://kgoldfeld.github.io/simstudy/)

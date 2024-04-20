@@ -77,7 +77,6 @@ sprintf("H%s", 1:9)
 paste("H", 1:9, sep="")
 ```
 
-
 Een andere nuttige functie voor strings is `strrep(x, times)` waarmee je strings meerdere keren kunt herhalen:
 
 ```{r}
@@ -136,9 +135,6 @@ stad <- ifelse(runif(n=20) > 0.6, "Hengelo", "Enschede")
 stad
 table(stad)
 ```
-
-
-
 
 ## Getallen
 
@@ -208,17 +204,16 @@ De functies `rnorm()`, `runif()`, ... genereren reële getallen. Wanneer je gehe
 
 Trekking uit een Normale verdeling, default `rnorm(n, mean = 0, sd = 1)`
 
+set.seed(15)
+
 ```{r}
-set.seed(16)
-x <- rnorm(n = 1000, mean = 65, sd = 3)
-ggplot(mapping=aes(x)) + geom_histogram()
+x <- rnorm(n = 10000, mean = 65, sd = 3)
+hist(x)
 ```
 
 Je kunt aselecte getallen uit meerdere verschillende normale verdelingen krijgen door een vector voor de parameters `mean` en `sd` te gebruiken. Dit kan nuttig zijn wanneer bijvoorbeeld data wilt simuleren voor een ANOVA analyse van een experiment met verschillende groepsgemiddeldes maar met dezelfde variantie.
 
-```{r}
-rnorm(n = 10, mean = c(5, 8, 12), sd = 1)
-```
+`rnorm(n = 10, mean = c(5, 8, 12), sd = 1)`
 
 De functie trekt achter elkaar een waarde uit elke verdeling tot het aantal opgegeven getallen bereikt is.
 
@@ -229,51 +224,60 @@ Trekking uit een Uniforme verdeling, default `runif(n, min = 0, max = 1)`
 Wanneer je getallen wilt genereren die strikt positief en continu zijn kan het gebruik hiervan erg nuttig zijn.
 
 ```{r}
-x <- runif(n = 1000, min = 10, max = 20)
-ggplot(mapping=aes(x)) + geom_histogram()
+x <- runif(n = 10000, min = 10, max = 20)
+hist(x)
 ```
 
 Wanneer je gehele getallen wilt hebben die ook nog eens van het type integer zijn kun je ook de functies `round()` en `as.integer()` gebruiken.
 
-```{r}
-as.integer(round(runif(n = 10, min = 40, max = 60)))
-```
+`as.integer(round(runif(n = 10, min = 40, max = 60)))`
 
 #### Poisson verdeling `rpois()`
 
-Voor discrete aantallen.
+Een Poissonproces beschrijft gebeurtenissen die met een bepaalde waarschijnlijkheid plaatsvinden in een bepaalde tijd.
 
 Trekking uit een Poisson verdeling `rpois(n, lambda)` met
 
--   gemiddelde = `lambda`
+-   gemiddelde = `lambda` met $\lambda > 0$
 -   variantie = `lambda`
 
-Het argument *lambda* is het gemiddelde, heeft geen default waarde en moet een niet-negatief getal zijn (integer hoeft niet). Je kunt de functie goed gebruiken voor bijvoorbeeld het genereren van frequenties van waarden.
+De uitkomsten zijn altijd gehele getallen. Je kunt de functie goed gebruiken voor bijvoorbeeld het genereren van frequenties van waarden.
 
 ```{r}
-x <- rpois(n = 100, lambda = 3.5)
-ggplot(mapping=aes(x)) + geom_histogram()
+x <- rpois(n = 10000, lambda = 3.5)
+table(x)
+hist(x)
 ```
 
-#### Negatief binomiale verdeling `rbinom()`
+#### Binomiale verdeling `rbinom()`
 
-Trekking uit een negatief binomiale verdeling `rbinom(n, size, prob)` met
+De binomiale verdeling is een discrete verdeling die het aantal successen telt in een Bernoulli proces. Dat is een proces dat bestaat uit een aantal herhalingen van een random experiment met als resultaat "succes" of "mislukking" (vandaar bi).
 
--   `size` - aantal pogingen
+Trekking uit een binomiale verdeling `rbinom(n, size, prob)` met
+
+-   `n` aantal keren dat het proces wordt uitgevoerd.
+
+-   `size` - aantal herhaling van het random experiment
+
 -   `prob` - kans op succes voor elke poging
 
-Voorbeeld van een fabriek welke 150 producten per week maakt. Bij de eindcontrole wordt gemiddeld bij 5% van de producten een fout aangetroffen die gerepareerd moeten worden. Simuleer het aantal foute producten voor 10 weken.
+Stel het proces bestaat uit het uitvoeren van 30 experimenten met een kans op succes bij elke poging van 20% en je telt het aantal successen van de 30. En dit proces ga je vervolgens 1000 keer herhalen. Dit levert dus 1000 waarnemingen van het aantal successen op. Statistisch gezien heb je dan 1000 trekkingen uit een binomiale verdeling gedaan.
 
 ```{r}
-x <- rbinom(n = 600, size = 150, prob = 0.05)
-ggplot(mapping=aes(x)) + geom_histogram()
+x <- rbinom(n = 1000, size = 30, prob = 0.20)
+table(x)
+hist(x)
 ```
 
 #### Exponentiële verdeling `rexp()`
 
-Trekking uit een exponentiële verdeling `rexp(n, rate = 1)` met
+De exponentiële verdeling is een continue kansverdeling die gebruikt wordt om de tijd te modelleren tusen gebeurtenissen die willekeurig van elkaar optreden met een constante snelheid. De exponentiële verdelingsfunctie is
 
--   ``` rate`` - met verwachting is ```1/rate\`
+$f(x) = \lambda e^{-\lambda x}$ met $\lambda$ als snelheidsparameter en $x$ als tijdvariabele.
+
+Trekking uit een exponentiële verdeling `rexp(n, rate = 1)`
+
+`rate` is de snelheidsparameter, gemiddelde = $1/\lambda$ en variantie = $1/ \lambda^2$
 
 De verdeling is goed te gebruiken voor data met uitschieters.
 
@@ -427,7 +431,6 @@ mydf
 ```
 
 Een wat complexer voorbeeld van een functie om een aantal personen met bepaalde kenmerken te genereren. Inspiratiebron: Functie create_data\_... uit package [explore](https://rolkra.github.io/explore/index.html).
-
 
 ```{r}
 # Maak functie
