@@ -1,0 +1,163 @@
+# Round Robin toernooi {#sec-roundrobin}
+
+Bij een Round Robin toernooi speelt iedere deelnemer (of team) één keer tegen elke andere deelnemer (team), verdeeld over een aantal rondes.
+
+Als $n$ het aantal deelnemers is, dan is het totaal aantal wedstrijden gelijk aan $\frac{n(n-1)}{2}$ wedstrijden nodig, omdat elke speler $n-1$ wedstrijden speelt. Als $n$ even is, dan kunnen in elk van de $(n - 1)$ ronden, $\frac{n}{2}$ spellen tegelijkertijd worden gespeeld, op voorwaarde dat er voldoende middelen zijn (bijvoorbeeld tafels voor een biljarttoernooi).
+
+Als $n$ oneven is worden de spelers aangevuld met een zogenaamde DUMMY. In elke ronde is er dan een speler met DUMMY als tegenstander, welke dan geen wedstrijd heeft.
+
+## Algoritme
+
+Het simpelste algoritme om een schema te maken is de cirkelmethode. Hierbij zet je één speler op een vaste positie, meestal de eerste of de laatste speler. Voor elke ronde worden de andere spelers dan steeds cirkelvormig 1 positie. Dit roteren kan zowel linksom als rechtsom (met de wijzers van de klok mee)
+
+Voorbeeld met 10 spelers (genummerd 1 t/m 10)
+
+Ronde 1
+
+De spelers worden cirkelvormig over 5 wedstrijden verdeeld.
+
+| speler 1 | speler 2 |
+|----------|----------|
+| 1        | 10       |
+| 2        | 9        |
+| 3        | 8        |
+| 4        | 7        |
+| 5        | 6        |
+
+Voor de volgende rondes wordt speler 1 vastgezet en worden de andere spelers cirkelvormig één positie linksom gedraaid.
+
+Ronde 2
+
+| speler 1 | speler 2 |
+|----------|----------|
+| 1        | 9        |
+| 10       | 8        |
+| 2        | 7        |
+| 3        | 6        |
+| 4        | 5        |
+
+Dit wordt herhaald totdat je de eerste ronde weer krijgt. Het gehele schema voor de 9 rondes ziet er dan als volgt uit
+
+| R1   | R2   | R3   | R4   | R5   | R6   | R7   | R8   | R9   |
+|------|------|------|------|------|------|------|------|------|
+| 1-10 | 1-9  | 1-8  | 1-7  | 1-6  | 1-5  | 1-4  | 1-3  | 1-2  |
+| 2-9  | 10-8 | 9-7  | 8-6  | 7-5  | 6-4  | 5-3  | 4-2  | 3-10 |
+| 3-8  | 2-7  | 10-6 | 9-5  | 8-4  | 7-3  | 6-2  | 5-10 | 4-9  |
+| 4-7  | 3-6  | 2-5  | 10-4 | 9-3  | 8-2  | 7-10 | 6-9  | 5-8  |
+| 5-6  | 4-5  | 3-4  | 2-3  | 10-2 | 9-10 | 8-9  | 7-8  | 6-7  |
+
+## R functies
+
+### roteer
+
+Allereerst wordt een functie gemaakt die de elementen van een vector cirkelvormig kan roteren.
+
+::: {.callout-note appearance="minimal"}
+Deze functie is een kopie van de functie `Desctools::VecRot()`.
+:::
+
+Syntax: `roteer(x, k=1)` met
+
+-   `x`: vector welke geroteerd moet worden
+
+-   `k`: het aantal rotaties, verschuiving naar rechts bij positieve k en verschuiving naar links bij negatieve k.
+
+```{r}
+roteer <- function (x, k = 1L) {
+  if (k != round(k)) {
+    k <- round(k)
+    warning("'k' is geen integer")
+  }
+  k <- k%%length(x) # modulo operator geeft rest na deling
+  rep(x, times = 2L)[(length(x) - k + 1L):(2L * length(x) - k)]
+}
+```
+
+Voorbeelden
+
+```{r}
+myvec <- 1:14
+myvec
+roteer(myvec, k=1)
+roteer(myvec, k=2)
+roteer(myvec, k=-1)
+roteer(myvec, k=-2)
+```
+
+### round_robin
+
+De functie `round_robin(n)` genereert een round robin toernooi met $n-1$ rondes voor n spelers waarbij elke speler een keer tegen een ander speler speelt. [^round-robin-1]
+
+[^round-robin-1]: De functie is deels gemaakt mbv ChatGPT.
+
+```{r}
+round_robin <- function(n) {
+  # Voeg een speler toe wanneer n oneven is
+  if (n %% 2 == 1) {
+    n <- n + 1
+  }
+  
+  # Initialiseer de list voor het opslaan van de rondes
+  rondes <- vector("list", n-1)
+  
+  # Maak een lijst met spelers (nummers)
+  spelers <- 1:n
+  
+  # Genereer de rondes
+  for (r in 1:(n-1)) {
+    # Genereer de paren voor deze ronde
+    rondeparen <- data.frame(Speler1 = integer(), Speler2 = integer(), stringsAsFactors = FALSE)
+    
+    # Paar speler 1 met de laatste roterende speler
+    rondeparen <- rbind(rondeparen, data.frame(Speler1 = spelers[1], Speler2 = spelers[n]))
+    
+    # Paar overige spelers
+    for (i in 2:(n/2)) {
+      rondeparen <- rbind(rondeparen, 
+                           data.frame(Speler1 = spelers[i], Speler2 = spelers[n-i+1]))
+    }
+    
+    # Sla de ronde op in de lijst met rondes
+    rondes[[r]] <- rondeparen
+    
+    # Roteer de spelers (speler 1 blijft vast)
+    # spelers <- c(spelers[1], spelers[n], spelers[2:(n-1)])
+    spelers <- c(spelers[1], roteer(spelers[2:n], k = 1))
+  }
+  
+  return(rondes)
+}
+```
+
+Voorbeeld
+
+```{r}
+toernooi <- round_robin(10)
+
+# Toon de rondes
+for (r in 1:length(toernooi)) {
+  cat(paste("Ronde", r, ":\n"))
+  print(toernooi[[r]])
+  cat("\n")
+}
+```
+
+### wedstrijd
+
+Voor een eendaagse wedstrijd kan het handig zijn om willekeurige wedstrijden te genereren.
+
+```{r}
+spelers=seq(1:14) # moet even aantal zijn, eventueel met dummy werken
+n <- length(spelers)
+
+# Schud de verzameling spelers door elkaar
+spelers <- sample(spelers, size=n, replace=FALSE)
+# Eerste helft
+wedstrijden <- data.frame(Speler1 = spelers[1:(n/2)], 
+                          Speler2 = spelers[(n/2+1):n])
+# Tweede helft toevoegen via rotatie eerste helft
+wedstrijden <- rbind(wedstrijden, 
+      data.frame(Speler1 = roteer(wedstrijden$Speler1, k= -2), 
+                 Speler2 = roteer(wedstrijden$Speler2, k= 2)))
+wedstrijden
+```

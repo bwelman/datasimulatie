@@ -14,6 +14,7 @@ book:
     - linmodels.qmd
     - functies.qmd
     - experimenten.qmd
+    - round-robin.qmd
     - referenties.qmd
 
 lang: nl
