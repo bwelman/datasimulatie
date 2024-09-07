@@ -62,7 +62,13 @@ table(koppen)/100 # fracties
 
 ### Vector
 
-Wanneer je de rijen van een vector willekeurig wilt schudden dan kan dat met de functie `sample()`.
+Wanneer je de rijen van een vector willekeurig wilt schudden dan kan dat met de functie `sample(x, size, replace = FALSE, prob = NULL)
+
+De standaardwaarde voor 'size' is het aantal items in x, zodat 'sample(x)' een willekeurige permutatie van de elementen van 'x' genereert.
+
+```{r}
+sample(1:20)
+```
 
 **Voorbeeld: Schoenmaten Nederlandse man**
 

@@ -315,7 +315,7 @@ De functie `sample()` trekt een aantal waarden willekeurig uit een verzameling m
 Syntax: `sample(x, size, replace = FALSE, prob = NULL)`
 
 -   `x` - vector met waarden waaruit getrokken gaat worden.
--   `size` - het aantal te trekken waarden (grootte steekproef)
+-   `size` - het aantal te trekken waarden (grootte steekproef). De defaultwaarde is het aantal elemenen in x.
 -   `replace` - voor met (TRUE) of zonder (FALSE) teruglegging
 -   `prob` - een vector met de kansen voor de onderdelen van x (facultatief). Wanneer deze wordt weggelaten hebben alle onderdelen dezelfde kans.
 
