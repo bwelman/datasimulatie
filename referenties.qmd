@@ -3,6 +3,7 @@
 ## Online sites:
 
 -   [Mockaroo](https://www.mockaroo.com/)
+-   [Fakery](https://fakery.dev/)
 
 ## Packages
 

@@ -53,7 +53,8 @@ simlist[1]
 Een experiment bestaat uit 5 worpen met een eerlijke munt waarbij het aantal keren kop geteld wordt. Dit experiment wordt 100 keer herhaald. Het resultaat van elk experiment wordt opgeslagen in `koppen`.
 
 ```{r}
-koppen <- replicate(100, sample(0:1, 5, TRUE) %>% sum())   
+koppen <- replicate(100, sample(0:1, 5, TRUE) |> 
+                      sum())   
 table(koppen) # aantallen
 table(koppen)/100 # fracties
 ```
@@ -62,7 +63,7 @@ table(koppen)/100 # fracties
 
 ### Vector
 
-Wanneer je de rijen van een vector willekeurig wilt schudden dan kan dat met de functie `sample(x, size, replace = FALSE, prob = NULL)
+Wanneer je de rijen van een vector willekeurig wilt schudden dan kan dat met de functie \`sample(x, size, replace = FALSE, prob = NULL)
 
 De standaardwaarde voor 'size' is het aantal items in x, zodat 'sample(x)' een willekeurige permutatie van de elementen van 'x' genereert.
 
@@ -70,13 +71,17 @@ De standaardwaarde voor 'size' is het aantal items in x, zodat 'sample(x)' een w
 sample(1:20)
 ```
 
-**Voorbeeld: Schoenmaten Nederlandse man**
+::: {#exm-schoenmaten}
+**Schoenmaten Nederlandse man**
 
 De webshop [schoenspannersshop](https://schoenspannersshop.nl/) heeft op basis van meer dan 3000 verkochte schoenspanners de [onderzoeksresultaten](https://www.persbericht.nu/schoenmaat-en-maatverdeling-van-de-nederlandse-man/) gepubliceerd van de schoenmaatverdeling van de Nederlandse man.
 
 ```{r}
-mydf <- data.frame(Maat = c(38:47), Fractie = c(0.010, 0.019, 0.052, 0.091, 0.239, 0.245, 0.175, 0.096, 0.056, 0.017))
-knitr::kable(mydf, caption = "Schoenmaten Nederlandse man 2013")
+#| label: tbl-schoenmaten
+#| fig-cap: "Schoenmaten Nederlandse man 2013"
+mydf <- data.frame(Maat = c(38:47), 
+                   Fractie = c(0.010, 0.019, 0.052, 0.091, 0.239, 0.245, 0.175, 0.096, 0.056, 0.017))
+tt(mydf, width = 0.5)
 ```
 
 Op basis hiervan heb ik 3000 schoenmaten gegenereerd volgens de aangegeven verdeling.
@@ -93,20 +98,24 @@ table(schoenmaten)
 
 Je kunt dit naar een csv bestand zonder rij- en kolomnamen schrijven met de volgende opdracht:
 
-```{r eval=FALSE}
+```{r}
+#| eval: false
 write.table(schoenmaten, file = "data/schoenmaten.csv", row.names = FALSE, col.names = FALSE)
 ```
+:::
 
 ### Data frame
 
-```{r eval=FALSE}
+```{r}
+#| eval: false
 newdf <- df[sample(nrow(df)),] # schudden
 rownames(newdf) <- NULL        # reset index
 ```
 
 Je kunt hiervoor een functie maken:
 
-```{r eval=FALSE}
+```{r}
+#| eval: false
 shuffle <- function(df) {
 	df <- df[sample(nrow(df)),] # shuffle
 	rownames(df) <- NULL        # reset index

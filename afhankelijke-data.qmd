@@ -49,12 +49,12 @@ table(mydata$status)
 De leeftijd voor gehuwden wordt getrokken uit N(40, 10) en voor ongehuwden uit N30, 12), waardoor gehuwden gemiddeld een iets oudere leeftijd hebben dan ongehuwden. En voor een ondergrens van wordt gezorgd met `pmax()`.
 
 ```{r}
-mydata <- mydata %>% 
+mydata <- mydata |> 
   mutate(
     leeftijd = ifelse(status == "gehuwd", 
                       rnorm(n = aantal, mean = 40, sd = 10), 
-                      rnorm(n = aantal, mean = 30, sd = 12)) %>% 
-      pmax(18) %>% 
+                      rnorm(n = aantal, mean = 30, sd = 12)) |> 
+      pmax(18) |> 
       round()
     )
 head(mydata, 8)
@@ -69,13 +69,17 @@ ggplot(data = mydata, aes(x = status, y = leeftijd)) + geom_boxplot()
 Hoeveel personen van 18 jaar zijn er gehuwd?
 
 ```{r}
-mydata %>% filter(status == "gehuwd" & leeftijd == 18) %>% nrow()
+mydata |> 
+  filter(status == "gehuwd" & leeftijd == 18) |> 
+  nrow()
 ```
 
 Als je de verdeling van de status onder de 18-jarigen wilt weten, dan kan dat met
 
 ```{r}
-mydata %>% filter(leeftijd == 18) %>% count(status)
+mydata |> 
+  filter(leeftijd == 18) |> 
+  count(status)
 ```
 
 ### case_when()
@@ -95,19 +99,20 @@ table(mydata$beroep)
 En vervolgens simulatie van het banksaldo, afhankelijk van het beroep.
 
 ```{r}
-mydata <- mydata %>% 
+mydata <- mydata |> 
   mutate(banksaldo = case_when(
     beroep == "arts" ~ 200 + rexp(aantal, rate = 0.001),
     beroep == "leraar" ~ 200 + rexp(aantal, rate = 0.005),
-    TRUE ~ 100 + rexp(aantal, rate = 0.01)) # dit is case else
-    %>% round()
-         )
+    TRUE ~ 100 + rexp(aantal, rate = 0.01)) |> # dit is case else
+    round()
+    )
 ```
 
 De verdeling van de banksaldi wordt inzichtelijk gemaakt met een boxplot.
 
 ```{r}
-mydata %>% ggplot(aes(x = beroep, y = banksaldo)) + geom_boxplot()
+mydata |> 
+  ggplot(aes(x = beroep, y = banksaldo)) + geom_boxplot()
 ```
 
 ## Afhankelijkheid door correlatie
@@ -316,7 +321,7 @@ dat <- faux::rnorm_multi(n = 30,
                          varnames = c("leeftijd", "banksaldo"), 
                          empirical = FALSE)
 
-dat <- dat %>%
+dat <- dat |>
   mutate(leeftijd = round(leeftijd, 0), banksaldo = round(banksaldo, 0))
 get_params(dat)
 ```
@@ -389,7 +394,7 @@ Een variant hierop
 ```{r}
 set.seed(49)
 dat <- rnorm_multi(n=40, vars=2, mu=c(10,40), sd=c(1,4), r=0.5, varnames = c("x", "y"), empirical = TRUE)
-dat <- dat %>%
+dat <- dat |>
   mutate(z = rnorm_pre(dat, mu=30, sd=3, r=c(0.75, 0.25), empirical= TRUE))
 get_params(dat)
 ```
