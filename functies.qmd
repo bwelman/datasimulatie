@@ -78,7 +78,7 @@ De webshop [schoenspannersshop](https://schoenspannersshop.nl/) heeft op basis v
 
 ```{r}
 #| label: tbl-schoenmaten
-#| fig-cap: "Schoenmaten Nederlandse man 2013"
+#| tbl-cap: "Schoenmaten Nederlandse man 2013"
 mydf <- data.frame(Maat = c(38:47), 
                    Fractie = c(0.010, 0.019, 0.052, 0.091, 0.239, 0.245, 0.175, 0.096, 0.056, 0.017))
 tt(mydf, width = 0.5)
