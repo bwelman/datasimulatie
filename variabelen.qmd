@@ -195,14 +195,15 @@ log(1:5)
 
 # goniometrisch
 cos((1:4)*pi)
-
+x <- sin(seq(0, 6, 0.25) * pi)
+plot(x, type="b")
 ```
 
-### Verdelingen
+## Verdelingen
 
 De functies `rnorm()`, `runif()`, ... genereren reële getallen. Wanneer je gehele getallen wilt, dan kun je deze functies ook gebruiken, samen met de afrondingsfunctie `round()` en `as.integer()` voor de type conversie. Om de random generator op een specifiek punt te starten kun je de functie `set.seed()` gebruiken. Een andere optie is om de functie `sample()` (zie verderop) te gebruiken.
 
-#### Normale verdeling `rnorm()`
+### Normale verdeling `rnorm()`
 
 Trekking uit een Normale verdeling, default `rnorm(n, mean = 0, sd = 1)`
 
@@ -219,7 +220,7 @@ Je kunt aselecte getallen uit meerdere verschillende normale verdelingen krijgen
 
 De functie trekt achter elkaar een waarde uit elke verdeling tot het aantal opgegeven getallen bereikt is.
 
-#### Uniforme verdeling `runif()`
+### Uniforme verdeling `runif()`
 
 Trekking uit een Uniforme verdeling, default `runif(n, min = 0, max = 1)`
 
@@ -234,7 +235,7 @@ Wanneer je gehele getallen wilt hebben die ook nog eens van het type integer zij
 
 `as.integer(round(runif(n = 10, min = 40, max = 60)))`
 
-#### Poisson verdeling `rpois()`
+### Poisson verdeling `rpois()`
 
 Een Poissonproces beschrijft gebeurtenissen die met een bepaalde waarschijnlijkheid plaatsvinden in een bepaalde tijd.
 
@@ -251,7 +252,7 @@ table(x)
 hist(x)
 ```
 
-#### Binomiale verdeling `rbinom()`
+### Binomiale verdeling `rbinom()`
 
 De binomiale verdeling is een discrete verdeling die het aantal successen telt in een Bernoulli proces. Dat is een proces dat bestaat uit een aantal herhalingen van een random experiment met als resultaat "succes" of "mislukking" (vandaar bi).
 
@@ -271,7 +272,7 @@ table(x)
 hist(x)
 ```
 
-#### Exponentiële verdeling `rexp()`
+### Exponentiële verdeling `rexp()`
 
 De exponentiële verdeling is een continue kansverdeling die gebruikt wordt om de tijd te modelleren tusen gebeurtenissen die willekeurig van elkaar optreden met een constante snelheid. De exponentiële verdelingsfunctie is
 
@@ -308,6 +309,165 @@ x <- c(12, 19, 34, 71, 43, 10, 52, 68)
 x
 pmax(x, 18) # Zorgt voor een ondergrens van 18
 pmin(x, 65) # Zorgt voor een bovengrens van 65
+```
+
+::: {#exm-random_range}
+Maak een functie random_range die n willekeurige getallen genereert in het bereik \[xmin, xmax\] met een standaarddeviatie xsd. De getallen moeten op 2 decimalen worden afgerond.
+
+```{r}
+random_range <- function(n, xmin, xmax, xsd){
+  x <- rnorm(n, mean = (xmin + xmax)/2, sd = xsd)
+  x <- round(x, 2)
+  x <- pmin(pmax(x, xmin), xmax)
+  return(x)
+}
+
+# test
+mydata <- random_range(n=50, xmin=2, xmax = 10, xsd = 1.2 )
+summary(mydata)
+hist(mydata)
+```
+:::
+
+## Scheve verdelingen
+
+In R kun je links- of rechts-scheve verdelingen genereren met verschillende methoden, afhankelijk van de verdelingsvorm en kenmerken die je wilt. Hierna volgen een aantal veel gebruikte benaderingen.
+
+### Via Gamma verdeling
+
+De Gamma-verdeling met een shape \> 1 geeft een **rechts-scheve** verdeling:
+
+```{r}
+#| label: fig-gamma_rechts
+#| fig-cap: "Rechts scheve verdeling via een gamma verdeling met shape=2 en rate=1."
+set.seed(123)
+rechts_scheef_gamma <- rgamma(1000, shape = 2, rate = 1)
+hist(rechts_scheef_gamma, breaks = 30, 
+     main = "Rechts Scheve verdeling", xlab = "")
+```
+
+Een **links-scheve** verdeling kun je maken door de rechts-scheve verdeling te spiegelen.
+
+```{r}
+#| label: fig-gamma_links
+#| fig-cap: "Links scheve verdeling door spiegeling van de rechtsscheve verdeling."
+links_scheef_gamma <- -rechts_scheef_gamma
+hist(links_scheef_gamma,  breaks = 30, 
+     main = "Links Scheve verdeling", xlab = "")
+```
+
+### Via Beta verdeling
+
+De Betaverdeling kan scheefgetrokken worden door de parameters shape1 en shape2 aan te passen:
+
+```{r}
+#| label: fig-beta_rechts
+#| fig-cap: "Rechts scheve verdeling via een beta verdeling met shape1=2 en shape2=5."
+set.seed(123)
+rechts_scheef_beta <- rbeta(1000, shape1 = 2, shape2 = 5)
+hist(rechts_scheef_beta, breaks = 30, 
+     main = "Rechts Scheve verdeling", xlab = "")
+```
+
+```{r}
+#| label: fig-beta_links
+#| fig-cap: "Links scheve verdeling via een beta verdeling met shape1=5 en shape2=2."
+set.seed(123)
+links_scheef_beta <- rbeta(1000, shape1 = 5, shape2 = 2)
+hist(links_scheef_beta, breaks = 30, 
+     main = "Links Scheve verdeling", xlab = "")
+```
+
+### Via transformatie normale verdeling
+
+Je kunt een normale verdeling scheef trekken met transformaties zoals kwadrateren of de vierkantswortel nemen:
+
+```{r}
+#| label: fig-trans_rechts
+#| fig-cap: "Rechts scheve verdeling via de vierkantswortel van een normale verdeling"
+set.seed(123)
+rechts_scheef_trans <- sqrt(rnorm(1000, mean = 5, sd =2))
+hist(rechts_scheef_trans, breaks = 30, 
+     main = "Rechts Scheve verdeling", xlab = "")
+```
+
+```{r}
+#| label: fig-trans_links
+#| fig-cap: "Links scheve verdeling via het kwadraat van een normale verdeling"
+set.seed(123)
+links_scheef_trans <- -(rnorm(1000, mean = 5, sd = 2))^2
+hist(links_scheef_trans, breaks = 30, 
+     main = "Links Scheve verdeling", , xlab = "")
+```
+
+### Via aangepaste functie
+
+```{r}
+#| label: fig-custom_rechts
+#| fig-cap: "Rechts scheve verdeling via exponentiele functie die van nature rechts scheef is."
+set.seed(123)
+rechts_scheef_custom <- rexp(1000, rate = 0.5)
+hist(rechts_scheef_custom, breaks = 30, 
+     main = "Rechts Scheve verdeling", xlab = "")
+```
+
+```{r}
+#| label: fig-custom_links
+#| fig-cap: "Links scheve verdeling via spiegeling van de rechts scheve verdeling."
+set.seed(123)
+links_scheef_custom <- -rechts_scheef_custom
+hist(links_scheef_custom, breaks = 30, 
+     main = "Links Scheve verdeling", xlab = "")
+```
+
+### Via package sn
+
+Package sn bevat functies om scheve verdelingen te genereren.
+
+```{r}
+#| label: fig-sn_rechts
+#| fig-cap: "Rechts scheve verdeling via package sn. Positieve alpha voor rechts scheef."
+library(sn)
+set.seed(123)
+rechts_scheef_sn <- rsn(1000, xi = 0, omega = 1, alpha = 5)
+hist(rechts_scheef_sn, breaks = 30, 
+     main = "Rechts Scheve verdeling", xlab = "")
+```
+
+```{r}
+#| label: fig-sn_links
+#| fig-cap: "Links scheve verdeling via package sn. Negatieve alpha voor links  scheef."
+set.seed(123)
+links_scheef_sn <- rsn(1000, xi = 0, omega = 1, alpha = -5)
+hist(links_scheef_sn, breaks = 30, 
+     main = "Links Scheve verdeling", xlab = "")
+```
+
+### Kurtosis
+
+Verdelingen met positieve kurtosis hebben "dikkere" staarten (meer extreme waarden). Bij negatieve kurtosis is de verdeling vlakker, de uniforme verdeling is daar een extremen vorm van.
+
+```{r}
+#| label: fig-kurtosis_positief
+#| fig-cap: "Positieve kurtosis."
+set.seed(123)
+kurt_pos <- rt(1000, df = 3) # t-verdeling met een lagere df vergroot kurtosis
+hist(kurt_pos, prob = TRUE, 
+     main = "Positieve kurtosis", xlab = "x", ylim = c(0, 0.4))
+lines(density(kurt_pos), col = "blue")
+summary(kurt_pos)
+```
+
+
+```{r}
+#| label: fig-kurtosis_negatief
+#| fig-cap: "Negatieve kurtosis."
+set.seed(123)
+kurt_neg <- rbeta(1000, shape1 = 1, shape2 = 1) # beta verdeling
+hist(kurt_neg, prob = TRUE, 
+     main = "Negatieve kurtosis", xlab = "x", ylim = c(0, 1.2))
+lines(density(kurt_neg), col = "blue")
+summary(kurt_neg)
 ```
 
 ## sample()
@@ -624,59 +784,72 @@ Inspiratiebron: [Simulated Data With R, Michael Minn](https://michaelminn.net/tu
 Soms worden statistische gegevens weergegeven als percentielen. Bijvoorbeeld de lengte (in cm) van een groep personen:
 
 ```{r}
-#| echo: false
 mydf <- data.frame(percentiel = c(5, 10, 15, 25, 50, 75, 85, 90, 95),
-                   lengte = c(163.3, 166.1, 167.9, 170.7, 175.5, 180.8, 183.6, 185.4, 188.2))
+                   waarde = c(163.3, 166.1, 167.9, 170.7, 175.5, 180.8, 183.6, 185.4, 188.2))
 tt(mydf)
+
+summary(mydf$lengte)
 ```
 
-Door een spline te gebruiken, is het mogelijk om een curve te simuleren die past bij die percentielpunten en vervolgens de functie `predict()` te gebruiken om een representatieve steekproef te maken.
+Dat betekent dat 5% een lengte \<= 163.3 cm heeft en 25% heeft een lengte \<=170.7 cm.
+
+Voor het genereren van data die hiermee overeenkomt kun je alleerst gebruik maken van de functie `smooth.spline()` die een fit maakt voor de data m.b.v. interpolatie. Je krijgt dan een soort functie voor de data net als bij regressie. Daarna kun je met de functie `predict()` data genereren.
 
 ```{r}
-percentiel = c(5, 10, 15, 25, 50, 75, 85, 90, 95)
-plengte = c(163.3, 166.1, 167.9, 170.7, 175.5, 180.8, 183.6, 185.4, 188.2)
-
 # Maak een spline die op deze punten past
-spline <- smooth.spline(x = percentiel, y = plengte)
+spline <- smooth.spline(x = mydf$percentiel, y = mydf$lengte)
 
-# Simuleer een aantal waarden die het bereik van de percentielen dekken
+# Genereer een aantal waarden die bij de spline passen
 n = 1000
 lengtes <- predict(spline, 100 * (1:n)/(n+1))
 
 # Plot van de gesimuleerde data
-plot(percentiel, plengte, col = "blue", pch = 16)
+plot(mydf$percentiel, mydf$waarde, col = "blue", pch = 16)
 lines(lengtes$x, lengtes$y)
 
-# Histogram en boxplot
+# Histogram, boxplot en samenvatting voor de gegenereerde data
 hist(lengtes$y)
 boxplot(lengtes$y)
-
-# Samenvattingen
 summary(lengtes$y)
-fivenum(lengtes$y)
 ```
 
-### Kwartieldata
+## Kwartieldata
 
-Genereer aselecte getallen met gegeven waarden voor de kwartielen Q0 (minimum), Q1, Q2 (mediaan), Q3 en Q4 (maximum).
+Genereer aselecte getallen met gespecificeerde waarden voor de kwartielen Q~0~ (minimum), Q~1~ (25% grens), Q~2~ (50% grens, mediaan), Q~3~ (75% grens) en Q~4~ (maximum).
 
 Het genereren van de data gaat eenvoudig met de hiervoor geschetste methode voor percentieldata.
 
 ```{r}
-percentiel <- c(0, 25, 50, 75, 100)
-pscore <- c(45, 52, 54, 57, 61)
+mydf <- data.frame(percentiel = seq(0, 100, 25) ,
+                   waarde = c(45, 52, 54, 57, 61))
 
-spline <- smooth.spline(percentiel, pscore)
-# simuleer 100 data
-n <- 100
+spline <- smooth.spline(x = mydf$percentiel, y = mydf$waarde)
+# genereer 200 data
+n <- 200
 scores <- predict(spline, 100 * (1:n) / (n+1))
 
 mydata <- round(scores$y, 0)
 
 hist(mydata)
 boxplot(mydata)
-
 summary(mydata)
-fivenum(mydata)
-
 ```
+
+## Aangepaste verdelingen
+
+::: {#exm-vd1}
+Genereer normaal verdeelde getallen binnen een specifiek interval en een standaarddeviatie.
+
+```{r}
+c_dist <- function(n, xmin, xmax, xsd) {
+  x <- rnorm(n, mean = (xmin + xmax)/2, sd = xsd)
+  x <- pmin(pmax(x, xmin), xmax)
+  return(x)
+}
+
+y <- c_dist(1000, 10, 100, 15)
+hist(y)
+boxplot(y)
+summary(y)
+```
+:::
