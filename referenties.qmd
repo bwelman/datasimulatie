@@ -20,3 +20,11 @@ Package van Lisa DeBruine. Heeft vooral functies voor het simuleren van categori
 Package ontwikkeld door Keith Goldfeld met als doel om op een gemakkelijke manier data te kunnen genereren voor simulaties en onderwijs.
 
 [simstudy](https://kgoldfeld.github.io/simstudy/)
+
+### synthpop
+
+[synthpop website](https://synthpop.org.uk/)
+
+Met deze package kun je synthetische versies van vertrouwelijke gegevens maken. Ook kun je een dataset genereren met gespecificeerde variabelen via een Shiny app. Synthetische gegevens zijn ook nuttig om datasets te leveren voor het onderwijs.
+
+Bij het installeren worden ook de volgende afhankelijke packages geïnstalleerd: `TH.data`, `matrixStats`, `multcomp`, `modeltools`, `strucchange`, `coin`, `sandwich`, `cmm`, `Rsolnp`, `party`, `proto`, `polspline`, `ranger`, `mipfp`, `rmutil`, `broman`

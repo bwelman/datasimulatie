@@ -399,7 +399,7 @@ dat <- dat |>
 get_params(dat)
 ```
 
-<!-- openxlsx::write.xlsx(dat, "S:/test.xlsx", asTable=FALSE, sheetName="data") -->
+<!-- openxlsx2::write_xlsx(dat, "S:/test.xlsx", as_table=FALSE, sheet="data") -->
 
 ### simstudy
 
